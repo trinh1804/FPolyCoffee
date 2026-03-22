@@ -1,0 +1,9 @@
+dao/CustomerDAOTest.class
+dao/StatisticDAOTest.class
+dao/BillDAOTest.class
+dao/UserDAOTest.class
+dao/CategoryDAOTest.class
+dao/BillDetailDAOTest.class
+dao/DiscountCodeDAOTest.class
+dao/PointDAOTest.class
+dao/DrinkDAOTest.class
