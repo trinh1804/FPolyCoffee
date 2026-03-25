@@ -28,7 +28,7 @@ public class JdbcUtil {
     }
 
     /**
-     * Tạo PreparedStatement - hỗ trợ cả SQL thường và stored procedure ({CALL ...})
+     * Tạo PreparedStatement - hỗ trợ cả SQL thường và stored procedure
      */
     public static PreparedStatement createPreStmt(String sql, Object... values) throws SQLException {
         Connection conn = getConnection();

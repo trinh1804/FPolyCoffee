@@ -1,12 +1,15 @@
+servlet/LogoutServlet.class
 dao/CrudDAO.class
 dao/StatisticDAO.class
 entity/Drink.class
 entity/RevenueByDay.class
+servlet/HomeServlet.class
 entity/BillDetail.class
 entity/Customer.class
 entity/PointTransaction.class
 util/JdbcUtil.class
 util/AuthFilter.class
+servlet/CategoryServlet.class
 dao/CustomerDAO.class
 util/ParamUtil.class
 dao/CategoryDAO.class
@@ -14,7 +17,6 @@ dao/BillDAO.class
 dao/PointDAO.class
 entity/Role.class
 entity/DiscountCode.class
-util/DateUtil.class
 dao/DrinkDAO.class
 entity/User.class
 entity/Category.class
@@ -22,6 +24,7 @@ dao/DiscountCodeDAO.class
 entity/Bill.class
 dao/BillDetailDAO.class
 dao/UserDAO.class
+servlet/AuthServlet.class
 util/AuthUtil.class
 util/FileUtil.class
 entity/BestSellingDrink.class

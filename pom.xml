@@ -5,11 +5,11 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.poly</groupId>
-  <artifactId>fpolycaffee</artifactId>
+  <artifactId>fpolycoffee</artifactId>
   <version>1</version>
   <packaging>war</packaging>
 
-  <name>fpolycaffee Maven Webapp</name>
+  <name>fpolycoffee Maven Webapp</name>
   <!-- FIXME change it to the project's website -->
   <url>http://www.example.com</url>
 
@@ -87,7 +87,7 @@
   </dependencies>
 
   <build>
-    <finalName>fpolycaffee</finalName>
+    <finalName>fpolycoffee</finalName>
     <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <plugin>
