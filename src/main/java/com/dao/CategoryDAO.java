@@ -3,11 +3,11 @@ package com.dao;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
 import com.entity.Category;
 import com.util.JpaUtil;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 
 public class CategoryDAO implements CrudDAO<Category, Integer> {
 

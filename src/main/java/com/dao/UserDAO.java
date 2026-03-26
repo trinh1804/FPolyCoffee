@@ -2,12 +2,12 @@ package com.dao;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+
 import com.entity.User;
 import com.util.JpaUtil;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.TypedQuery;
 
 public class UserDAO implements CrudDAO<User, Integer> {
 

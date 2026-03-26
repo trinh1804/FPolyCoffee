@@ -3,12 +3,12 @@ package com.dao;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
 import com.entity.Bill;
 import com.entity.BillDetail;
 import com.util.JpaUtil;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 
 public class BillDAO implements CrudDAO<Bill, Integer> {
 

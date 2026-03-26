@@ -1,31 +1,9 @@
 package com.util;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.Persistence;
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
-/**
- * Tiện ích JPA – quản lý EntityManagerFactory dưới dạng singleton.
- * EntityManagerFactory rất nặng → chỉ tạo 1 lần khi ứng dụng khởi động.
- * EntityManager nhẹ → tạo mới cho mỗi request / transaction.
- *
- * Cách dùng điển hình trong DAO:
- * 
- * <pre>
- * EntityManager em = JpaUtil.getEntityManager();
- * try {
- *     em.getTransaction().begin();
- *     // ... thao tác DB
- *     em.getTransaction().commit();
- * } catch (Exception e) {
- *     if (em.getTransaction().isActive())
- *         em.getTransaction().rollback();
- *     throw e;
- * } finally {
- *     em.close();
- * }
- * </pre>
- */
 public class JpaUtil {
 
     private static final String PERSISTENCE_UNIT = "FPolyCoffee";

@@ -5,20 +5,8 @@
             <div class="row">
                 <div class="col-12">
                     <div class="card bg-dark text-white mb-4">
-                        <img src="${pageContext.request.contextPath}/images/banner-coffee.jpg" class="card-img"
+                        <img src="${pageContext.request.contextPath}/uploads/banner-coffee.png" class="card-img"
                             alt="PolyCoffee Banner" style="height: 400px; object-fit: cover;">
-                        <div class="card-img-overlay d-flex align-items-center justify-content-center">
-                            <div class="text-center bg-dark bg-opacity-50 p-4 rounded">
-                                <h1 class="display-4">Chào mừng đến với PolyCoffee</h1>
-                                <p class="lead">Thức uống chất lượng - Phục vụ tận tâm</p>
-                                <c:if test="${sessionScope.user == null}">
-                                    <a href="${pageContext.request.contextPath}/dang-nhap"
-                                        class="btn btn-primary btn-lg mt-3">
-                                        <i class="bi bi-box-arrow-in-right"></i> Đăng nhập ngay
-                                    </a>
-                                </c:if>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

@@ -2,11 +2,11 @@ package com.dao;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+
 import com.entity.Drink;
 import com.util.JpaUtil;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 
 public class DrinkDAO implements CrudDAO<Drink, Integer> {
 

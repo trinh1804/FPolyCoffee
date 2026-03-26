@@ -4,7 +4,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-4">
-                <h5>PolyCoffee</h5>
+                <h5>FPolyCoffee</h5>
                 <p>Thức uống chất lượng - Phục vụ tận tâm</p>
             </div>
             <div class="col-md-4">

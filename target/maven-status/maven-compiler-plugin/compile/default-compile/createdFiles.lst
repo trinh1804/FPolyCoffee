@@ -15,7 +15,6 @@ com/dao/StatisticDAO.class
 com/dao/PointDAO.class
 com/entity/Bill.class
 com/dao/CrudDAO.class
-com/util/JdbcUtil.class
 com/dao/BillDetailDAO.class
 com/entity/DiscountCode.class
 com/entity/User.class

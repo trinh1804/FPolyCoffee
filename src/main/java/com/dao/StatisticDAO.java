@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+
 import com.entity.BestSellingDrink;
 import com.entity.RevenueByDay;
 import com.util.JpaUtil;
-
-import jakarta.persistence.EntityManager;
 
 /**
  * StatisticDAO – sử dụng Native Query vì các câu truy vấn tổng hợp

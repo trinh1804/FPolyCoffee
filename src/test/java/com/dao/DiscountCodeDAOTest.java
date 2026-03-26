@@ -16,6 +16,11 @@ import static org.mockito.Mockito.when;
 import java.util.Date;
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.NoResultException;
+import javax.persistence.TypedQuery;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -26,11 +31,6 @@ import org.mockito.MockedStatic;
 
 import com.entity.DiscountCode;
 import com.util.JpaUtil;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.NoResultException;
-import jakarta.persistence.TypedQuery;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DiscountCodeDAOTest {
