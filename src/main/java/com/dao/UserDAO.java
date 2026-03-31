@@ -198,4 +198,110 @@ public class UserDAO implements CrudDAO<User, Integer> {
             em.close();
         }
     }
+
+    public List<User> searchStaff(String fullName, String email, Boolean active, int page, int pageSize) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT u FROM User u WHERE u.roleId = 2");
+
+            if (fullName != null && !fullName.trim().isEmpty()) {
+                jpql.append(" AND u.fullName LIKE :fullName");
+            }
+            if (email != null && !email.trim().isEmpty()) {
+                jpql.append(" AND u.email LIKE :email");
+            }
+            if (active != null) {
+                jpql.append(" AND u.active = :active");
+            }
+
+            jpql.append(" ORDER BY u.id DESC");
+
+            TypedQuery<User> query = em.createQuery(jpql.toString(), User.class);
+
+            if (fullName != null && !fullName.trim().isEmpty()) {
+                query.setParameter("fullName", "%" + fullName.trim() + "%");
+            }
+            if (email != null && !email.trim().isEmpty()) {
+                query.setParameter("email", "%" + email.trim() + "%");
+            }
+            if (active != null) {
+                query.setParameter("active", active);
+            }
+
+            int offset = (page - 1) * pageSize;
+            query.setFirstResult(offset);
+            query.setMaxResults(pageSize);
+
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Đếm tổng số nhân viên thỏa mãn điều kiện
+     */
+    public int countSearchStaff(String fullName, String email, Boolean active) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT COUNT(u) FROM User u WHERE u.roleId = 2");
+
+            if (fullName != null && !fullName.trim().isEmpty()) {
+                jpql.append(" AND u.fullName LIKE :fullName");
+            }
+            if (email != null && !email.trim().isEmpty()) {
+                jpql.append(" AND u.email LIKE :email");
+            }
+            if (active != null) {
+                jpql.append(" AND u.active = :active");
+            }
+
+            TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
+
+            if (fullName != null && !fullName.trim().isEmpty()) {
+                query.setParameter("fullName", "%" + fullName.trim() + "%");
+            }
+            if (email != null && !email.trim().isEmpty()) {
+                query.setParameter("email", "%" + email.trim() + "%");
+            }
+            if (active != null) {
+                query.setParameter("active", active);
+            }
+
+            Long count = query.getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Lấy danh sách nhân viên (chỉ roleId = 2)
+     */
+    public List<User> findAllStaff() {
+        return findBySql("SELECT u FROM User u WHERE u.roleId = 2 ORDER BY u.id DESC");
+    }
+
+    /**
+     * Cập nhật mật khẩu mới cho nhân viên
+     */
+    public int resetPassword(Integer id, String newPassword) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            int rows = em.createQuery("UPDATE User u SET u.password = ?1 WHERE u.id = ?2")
+                    .setParameter(1, newPassword)
+                    .setParameter(2, id)
+                    .executeUpdate();
+            em.getTransaction().commit();
+            return rows;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            e.printStackTrace();
+            return 0;
+        } finally {
+            em.close();
+        }
+    }
 }

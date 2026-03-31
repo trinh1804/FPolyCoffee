@@ -18,7 +18,6 @@ CREATE TABLE [USER]
     phone VARCHAR(20) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     status BIT NOT NULL DEFAULT 1,
-    -- 1=active, 0=locked
     role_id INT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (role_id) REFERENCES ROLE(id)
@@ -120,6 +119,7 @@ CREATE TABLE POINT
     FOREIGN KEY (bill_id) REFERENCES BILL(id) ON DELETE NO ACTION
 );
 
+select * from [USER]
 
 INSERT INTO ROLE
     (name)
@@ -134,6 +134,11 @@ VALUES
     (N'Mai Quốc Tam', 'tam@gmail.com', '0907828123', '123456', 1, 2),
     (N'Nguyễn Bá Hải Anh', 'anh@gmail.com', '090947195', '123456', 1, 2),
     (N'Trần Hải An', 'an@gmail.com', '098471502', '123456', 1, 2);
+
+INSERT INTO [USER]
+    (fullname, email, phone, password, status, role_id)
+VALUES
+    (N'Test', 'trinhpham180408@gmail.com', '0919123123', '123456', 1, 2);
 
 INSERT INTO CATEGORY
     (name, description, image, status, created_at)

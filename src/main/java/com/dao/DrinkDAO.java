@@ -128,4 +128,81 @@ public class DrinkDAO implements CrudDAO<Drink, Integer> {
             em.close();
         }
     }
+
+    public List<Drink> searchAndPaginate(String name, Integer categoryId, Boolean active, int page, int pageSize) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT d FROM Drink d WHERE 1=1");
+
+            if (name != null && !name.trim().isEmpty()) {
+                jpql.append(" AND d.name LIKE :name");
+            }
+            if (categoryId != null && categoryId > 0) {
+                jpql.append(" AND d.categoryId = :categoryId");
+            }
+            if (active != null) {
+                jpql.append(" AND d.active = :active");
+            }
+
+            jpql.append(" ORDER BY d.id DESC");
+
+            TypedQuery<Drink> query = em.createQuery(jpql.toString(), Drink.class);
+
+            if (name != null && !name.trim().isEmpty()) {
+                query.setParameter("name", "%" + name.trim() + "%");
+            }
+            if (categoryId != null && categoryId > 0) {
+                query.setParameter("categoryId", categoryId);
+            }
+            if (active != null) {
+                query.setParameter("active", active);
+            }
+
+            // Phân trang
+            int offset = (page - 1) * pageSize;
+            query.setFirstResult(offset);
+            query.setMaxResults(pageSize);
+
+            return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Đếm tổng số bản ghi thỏa mãn điều kiện tìm kiếm
+     */
+    public int countSearch(String name, Integer categoryId, Boolean active) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT COUNT(d) FROM Drink d WHERE 1=1");
+
+            if (name != null && !name.trim().isEmpty()) {
+                jpql.append(" AND d.name LIKE :name");
+            }
+            if (categoryId != null && categoryId > 0) {
+                jpql.append(" AND d.categoryId = :categoryId");
+            }
+            if (active != null) {
+                jpql.append(" AND d.active = :active");
+            }
+
+            TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
+
+            if (name != null && !name.trim().isEmpty()) {
+                query.setParameter("name", "%" + name.trim() + "%");
+            }
+            if (categoryId != null && categoryId > 0) {
+                query.setParameter("categoryId", categoryId);
+            }
+            if (active != null) {
+                query.setParameter("active", active);
+            }
+
+            Long count = query.getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
 }

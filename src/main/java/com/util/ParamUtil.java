@@ -65,4 +65,15 @@ public class ParamUtil {
             return false;
         }
     }
+
+    public static double getDouble(HttpServletRequest request, String name, double defaultValue) {
+        try {
+            String value = request.getParameter(name);
+            if (value == null || value.trim().isEmpty())
+                return defaultValue;
+            return Double.parseDouble(value.trim());
+        } catch (Exception e) {
+            return defaultValue;
+        }
+    }
 }
