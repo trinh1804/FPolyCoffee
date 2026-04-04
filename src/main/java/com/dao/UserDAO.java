@@ -214,7 +214,7 @@ public class UserDAO implements CrudDAO<User, Integer> {
                 jpql.append(" AND u.active = :active");
             }
 
-            jpql.append(" ORDER BY u.id DESC");
+            jpql.append(" ORDER BY u.id ");
 
             TypedQuery<User> query = em.createQuery(jpql.toString(), User.class);
 
@@ -279,7 +279,7 @@ public class UserDAO implements CrudDAO<User, Integer> {
      * Lấy danh sách nhân viên (chỉ roleId = 2)
      */
     public List<User> findAllStaff() {
-        return findBySql("SELECT u FROM User u WHERE u.roleId = 2 ORDER BY u.id DESC");
+        return findBySql("SELECT u FROM User u WHERE u.roleId = 2 ORDER BY u.id");
     }
 
     /**

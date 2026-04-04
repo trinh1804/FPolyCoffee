@@ -12,10 +12,10 @@ import javax.servlet.http.HttpServletResponse;
 import com.dao.UserDAO;
 import com.entity.User;
 import com.util.AuthUtil;
-import com.util.Mailer;
 import com.util.ParamUtil;
 
-@WebServlet({ "/manager/staff", "/manager/staff/reset-password" })
+@WebServlet({ "/manager/staff", "/manager/staff/create", "/manager/staff/edit", "/manager/staff/delete",
+        "/manager/staff/toggle-status" })
 public class StaffServlet extends HttpServlet {
 
     private final UserDAO userDAO = new UserDAO();
@@ -31,6 +31,40 @@ public class StaffServlet extends HttpServlet {
             return;
         }
 
+        String uri = req.getRequestURI();
+
+        if (uri.contains("/create")) {
+            // Hiển thị form thêm nhân viên
+            showCreateForm(req, resp);
+        } else if (uri.contains("/edit")) {
+            // Hiển thị form sửa nhân viên
+            showEditForm(req, resp);
+        } else {
+            // Hiển thị danh sách
+            listStaff(req, resp);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        String uri = req.getRequestURI();
+
+        if (uri.contains("/create")) {
+            createStaff(req, resp);
+        } else if (uri.contains("/edit")) {
+            updateStaff(req, resp);
+        } else if (uri.contains("/delete")) {
+            deleteStaff(req, resp);
+        } else if (uri.contains("/toggle-status")) {
+            toggleStatus(req, resp);
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/manager/staff");
+        }
+    }
+
+    private void listStaff(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
         // Lấy tham số tìm kiếm
         String searchName = ParamUtil.getString(req, "searchName");
         String searchEmail = ParamUtil.getString(req, "searchEmail");
@@ -62,92 +96,191 @@ public class StaffServlet extends HttpServlet {
         req.getRequestDispatcher("/views/staff/list.jsp").forward(req, resp);
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+    private void showCreateForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        String uri = req.getRequestURI();
-
-        if (uri.contains("/reset-password")) {
-            resetPassword(req, resp);
-        } else {
-            // Xử lý cập nhật thông tin nhân viên (tùy chọn)
-            updateStaff(req);
-            resp.sendRedirect(req.getContextPath() + "/manager/staff");
-        }
+        req.getRequestDispatcher("/views/staff/form.jsp").forward(req, resp);
     }
 
-    private void resetPassword(HttpServletRequest req, HttpServletResponse resp)
+    private void showEditForm(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        int staffId = ParamUtil.getInt(req, "id");
-        if (staffId <= 0) {
+        int id = ParamUtil.getInt(req, "id");
+        if (id <= 0) {
             req.getSession().setAttribute("error", "ID nhân viên không hợp lệ!");
             resp.sendRedirect(req.getContextPath() + "/manager/staff");
             return;
         }
 
-        User staff = userDAO.findById(staffId);
+        User staff = userDAO.findById(id);
         if (staff == null || staff.getRoleId() != 2) {
             req.getSession().setAttribute("error", "Không tìm thấy nhân viên!");
             resp.sendRedirect(req.getContextPath() + "/manager/staff");
             return;
         }
 
-        // Random mật khẩu mới (6 ký tự)
-        String newPassword = generateRandomPassword(6);
+        req.setAttribute("staff", staff);
+        req.getRequestDispatcher("/views/staff/form.jsp").forward(req, resp);
+    }
 
-        // Cập nhật vào database
-        int result = userDAO.resetPassword(staffId, newPassword);
+    private void createStaff(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        String fullName = ParamUtil.getString(req, "fullName");
+        String email = ParamUtil.getString(req, "email");
+        String phone = ParamUtil.getString(req, "phone");
+        String password = ParamUtil.getString(req, "password");
+
+        // Validate
+        if (fullName == null || fullName.trim().isEmpty()) {
+            req.getSession().setAttribute("error", "Họ tên không được để trống!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff/create");
+            return;
+        }
+
+        // Check email trùng
+        if (userDAO.findByEmailAny(email) != null) {
+            req.getSession().setAttribute("error", "Email đã tồn tại!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff/create");
+            return;
+        }
+
+        // Check phone trùng
+        if (userDAO.findByPhone(phone) != null) {
+            req.getSession().setAttribute("error", "Số điện thoại đã tồn tại!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff/create");
+            return;
+        }
+
+        User newStaff = new User();
+        newStaff.setFullName(fullName);
+        newStaff.setEmail(email);
+        newStaff.setPhone(phone);
+        newStaff.setPassword(password != null && !password.isEmpty() ? password : "123456");
+        newStaff.setActive(true);
+        newStaff.setRoleId(2); // Nhân viên
+
+        int result = userDAO.create(newStaff);
 
         if (result > 0) {
-            // Gửi email
-            String subject = "[FPolyCoffee] Mật khẩu mới của bạn";
-            String body = buildEmailBody(staff.getFullName(), newPassword);
-
-            int mailResult = Mailer.send("vythaianh2021@gmail.com", staff.getEmail(), subject, body);
-
-            if (mailResult > 0) {
-                req.getSession().setAttribute("message",
-                        "Đã cấp lại mật khẩu cho nhân viên " + staff.getFullName() +
-                                ". Mật khẩu mới đã được gửi đến email " + staff.getEmail());
-            } else {
-                req.getSession().setAttribute("error",
-                        "Đã cập nhật mật khẩu nhưng gửi email thất bại!");
-            }
+            req.getSession().setAttribute("message", "Thêm nhân viên thành công!");
         } else {
-            req.getSession().setAttribute("error", "Cập nhật mật khẩu thất bại!");
+            req.getSession().setAttribute("error", "Thêm nhân viên thất bại!");
         }
 
         resp.sendRedirect(req.getContextPath() + "/manager/staff");
     }
 
-    private void updateStaff(HttpServletRequest req) {
-        // Có thể thêm chức năng cập nhật thông tin nhân viên
-        // Tạm thời để trống
-    }
+    private void updateStaff(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        int id = ParamUtil.getInt(req, "id");
+        String fullName = ParamUtil.getString(req, "fullName");
+        String email = ParamUtil.getString(req, "email");
+        String phone = ParamUtil.getString(req, "phone");
 
-    /**
-     * Tạo mật khẩu ngẫu nhiên
-     */
-    private String generateRandomPassword(int length) {
-        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz23456789";
-        StringBuilder password = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            int index = (int) (Math.random() * chars.length());
-            password.append(chars.charAt(index));
+        if (id <= 0) {
+            req.getSession().setAttribute("error", "ID nhân viên không hợp lệ!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff");
+            return;
         }
-        return password.toString();
+
+        User staff = userDAO.findById(id);
+        if (staff == null || staff.getRoleId() != 2) {
+            req.getSession().setAttribute("error", "Không tìm thấy nhân viên!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff");
+            return;
+        }
+
+        // Check email trùng (trừ chính nó)
+        User existEmail = userDAO.findByEmailAny(email);
+        if (existEmail != null && !existEmail.getId().equals(id)) {
+            req.getSession().setAttribute("error", "Email đã tồn tại!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff/edit?id=" + id);
+            return;
+        }
+
+        // Check phone trùng (trừ chính nó)
+        User existPhone = userDAO.findByPhone(phone);
+        if (existPhone != null && !existPhone.getId().equals(id)) {
+            req.getSession().setAttribute("error", "Số điện thoại đã tồn tại!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff/edit?id=" + id);
+            return;
+        }
+
+        staff.setFullName(fullName);
+        staff.setEmail(email);
+        staff.setPhone(phone);
+
+        int result = userDAO.update(staff);
+
+        if (result > 0) {
+            req.getSession().setAttribute("message", "Cập nhật nhân viên thành công!");
+        } else {
+            req.getSession().setAttribute("error", "Cập nhật nhân viên thất bại!");
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/manager/staff");
     }
 
-    /**
-     * Tạo nội dung email
-     */
-    private String buildEmailBody(String fullName, String newPassword) {
-        return "<html><body>" +
-                "<h2>Xin chào " + fullName + ",</h2>" +
-                "<p>Hệ thống FPolyCoffee đã cấp lại mật khẩu mới cho bạn.</p>" +
-                "<p><strong>Mật khẩu mới của bạn là: " + newPassword + "</strong></p>" +
-                "<hr>" +
-                "<p><i>Trân trọng,</i><br>Đội ngũ FPolyCoffee</p>" +
-                "</body></html>";
+    private void deleteStaff(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        int id = ParamUtil.getInt(req, "id");
+
+        if (id <= 0) {
+            req.getSession().setAttribute("error", "ID nhân viên không hợp lệ!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff");
+            return;
+        }
+
+        User staff = userDAO.findById(id);
+        if (staff == null || staff.getRoleId() != 2) {
+            req.getSession().setAttribute("error", "Không tìm thấy nhân viên!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff");
+            return;
+        }
+
+        int result = userDAO.delete(id);
+
+        if (result > 0) {
+            req.getSession().setAttribute("message", "Xóa nhân viên thành công!");
+        } else {
+            req.getSession().setAttribute("error", "Xóa nhân viên thất bại!");
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/manager/staff");
+    }
+
+    private void toggleStatus(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        int id = ParamUtil.getInt(req, "id");
+
+        if (id <= 0) {
+            req.getSession().setAttribute("error", "ID nhân viên không hợp lệ!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff");
+            return;
+        }
+
+        User staff = userDAO.findById(id);
+        if (staff == null || staff.getRoleId() != 2) {
+            req.getSession().setAttribute("error", "Không tìm thấy nhân viên!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff");
+            return;
+        }
+
+        // Không cho khóa chính mình
+        User currentUser = AuthUtil.getUser(req);
+        if (currentUser != null && currentUser.getId().equals(id)) {
+            req.getSession().setAttribute("error", "Bạn không thể khóa tài khoản của chính mình!");
+            resp.sendRedirect(req.getContextPath() + "/manager/staff");
+            return;
+        }
+
+        int result = userDAO.updateStatus(id, !staff.isActive());
+
+        if (result > 0) {
+            req.getSession().setAttribute("message",
+                    staff.isActive() ? "Đã khóa tài khoản nhân viên!" : "Đã mở khóa tài khoản nhân viên!");
+        } else {
+            req.getSession().setAttribute("error", "Thao tác thất bại!");
+        }
+
+        resp.sendRedirect(req.getContextPath() + "/manager/staff");
     }
 }

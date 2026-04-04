@@ -22,6 +22,7 @@ com/entity/DiscountCode.class
 com/entity/User.class
 com/dao/BillDAO.class
 com/util/ParamUtil.class
+com/servlet/ForgotPasswordServlet.class
 com/servlet/StaffServlet.class
 com/servlet/LogoutServlet.class
 com/util/JpaUtil.class

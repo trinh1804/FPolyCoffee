@@ -138,7 +138,7 @@ VALUES
 INSERT INTO [USER]
     (fullname, email, phone, password, status, role_id)
 VALUES
-    (N'Test', 'trinhpham180408@gmail.com', '0919123123', '123456', 1, 2);
+    (N'Test', 'trinhpham180408@gmail.com', '038290482', '123456', 1, 2);
 
 INSERT INTO CATEGORY
     (name, description, image, status, created_at)

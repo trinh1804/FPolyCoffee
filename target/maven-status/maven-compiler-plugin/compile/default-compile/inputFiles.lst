@@ -23,6 +23,7 @@
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/AuthServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/CategoryServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/DrinkServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/ForgotPasswordServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/HomeServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/LogoutServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/StaffServlet.java
