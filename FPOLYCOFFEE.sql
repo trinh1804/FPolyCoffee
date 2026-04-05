@@ -248,3 +248,297 @@ VALUES
     (N'Chocolate hazelnut', 65000, N'Chocolate hạt phỉ kiểu Châu Âu', 'choco_hazelnut.jpg', 1, 7);
 GO
 
+-- Thêm khách hàng
+INSERT INTO CUSTOMER (fullname, phone, email, point, status, created_at)
+VALUES 
+    (N'Nguyễn Văn An', '0987654321', 'an.nguyen@email.com', 150, 1, '2026-03-01'),
+    (N'Trần Thị Bình', '0976543210', 'binh.tran@email.com', 85, 1, '2026-03-05'),
+    (N'Lê Văn Cường', '0965432109', 'cuong.le@email.com', 200, 1, '2026-03-10'),
+    (N'Phạm Thị Dung', '0954321098', 'dung.pham@email.com', 45, 1, '2026-03-15'),
+    (N'Hoàng Văn Em', '0943210987', 'em.hoang@email.com', 320, 1, '2026-03-20'),
+    (N'Ngô Thị Phương', '0932109876', 'phuong.ngo@email.com', 0, 1, '2026-04-01'),
+    (N'Đỗ Văn Giang', '0921098765', 'giang.do@email.com', 12, 1, '2026-04-02'),
+    (N'Vũ Thị Hà', '0910987654', 'ha.vu@email.com', 78, 1, '2026-04-03');
+GO
+
+-- Thêm mã giảm giá
+INSERT INTO DISCOUNTCODE (code, discount_value, discount_type, start_date, end_date, status, condition_note)
+VALUES 
+    ('WELCOME10', 10, 1, '2026-03-01', '2026-12-31', 1, N'Giảm 10% cho đơn hàng đầu tiên'),
+    ('GIAM20K', 20000, 0, '2026-03-01', '2026-12-31', 1, N'Giảm 20.000đ cho đơn từ 100.000đ'),
+    ('SALE50', 50, 1, '2026-04-01', '2026-04-10', 1, N'Giảm 50% nhân dịp khai trương'),
+    ('FREESHIP', 15000, 0, '2026-04-01', '2026-04-30', 1, N'Giảm 15.000đ phí ship'),
+    ('MEMBERS', 15, 1, '2026-03-15', '2026-12-31', 1, N'Giảm 15% cho thành viên VIP'),
+    ('DACBIET30', 30, 1, '2026-04-05', '2026-04-15', 1, N'Giảm 30% đặc biệt'),
+    ('CUOITUAN', 10, 1, '2026-04-01', '2026-04-30', 1, N'Giảm 10% cuối tuần');
+GO
+
+-- Hóa đơn tháng 3 (đã hoàn thành)
+INSERT INTO BILL (created_at, total_price, discount_amount, payment_method, status, code, user_id, customer_id, discount_id)
+VALUES 
+    ('2026-03-01', 125000, 0, 0, 1, 'HD001', 2, 1, NULL),
+    ('2026-03-02', 89000, 0, 1, 1, 'HD002', 3, 2, NULL),
+    ('2026-03-03', 210000, 21000, 0, 1, 'HD003', 4, 3, 1),
+    ('2026-03-05', 45000, 0, 0, 1, 'HD004', 2, 1, NULL),
+    ('2026-03-07', 175000, 0, 1, 1, 'HD005', 3, 4, NULL),
+    ('2026-03-10', 320000, 48000, 0, 1, 'HD006', 4, 5, 2),
+    ('2026-03-12', 95000, 0, 0, 1, 'HD007', 2, 2, NULL),
+    ('2026-03-15', 280000, 28000, 1, 1, 'HD008', 3, 3, 1),
+    ('2026-03-18', 67000, 0, 0, 1, 'HD009', 4, 6, NULL),
+    ('2026-03-20', 450000, 67500, 0, 1, 'HD010', 2, 5, 3),
+    ('2026-03-22', 150000, 0, 1, 1, 'HD011', 3, 1, NULL),
+    ('2026-03-25', 89000, 0, 0, 1, 'HD012', 4, 7, NULL),
+    ('2026-03-27', 235000, 23500, 1, 1, 'HD013', 2, 4, 5),
+    ('2026-03-28', 120000, 0, 0, 1, 'HD014', 3, 2, NULL),
+    ('2026-03-29', 345000, 0, 1, 1, 'HD015', 4, 8, NULL),
+    ('2026-03-30', 98000, 0, 0, 1, 'HD016', 2, 3, NULL),
+    ('2026-03-31', 560000, 84000, 0, 1, 'HD017', 3, 5, 3);
+
+-- Hóa đơn tháng 4 (đã hoàn thành, đang chờ, đã hủy)
+INSERT INTO BILL (created_at, total_price, discount_amount, payment_method, status, code, user_id, customer_id, discount_id)
+VALUES 
+    ('2026-04-01', 185000, 18500, 0, 1, 'HD018', 4, 1, 1),
+    ('2026-04-01', 75000, 0, 1, 1, 'HD019', 2, 2, NULL),
+    ('2026-04-02', 420000, 63000, 0, 1, 'HD020', 3, 5, 3),
+    ('2026-04-02', 95000, 0, 0, 1, 'HD021', 4, 3, NULL),
+    ('2026-04-03', 150000, 0, 1, 1, 'HD022', 2, 4, NULL),
+    ('2026-04-03', 280000, 42000, 0, 1, 'HD023', 3, 6, 5),
+    ('2026-04-04', 67000, 0, 0, 1, 'HD024', 4, 1, NULL),
+    ('2026-04-04', 340000, 0, 1, 1, 'HD025', 2, 7, NULL),
+    ('2026-04-05', 195000, 0, 0, 1, 'HD026', 3, 2, NULL),
+    ('2026-04-05', 110000, 0, 1, 0, 'HD027', 4, 8, NULL),  -- Đang chờ xử lý
+    ('2026-04-05', 250000, 0, 0, 0, 'HD028', 2, 3, NULL),  -- Đang chờ xử lý
+    ('2026-04-05', 89000, 0, 1, 2, 'HD029', 3, 4, NULL),  -- Đã hủy
+    ('2026-04-05', 450000, 0, 0, 2, 'HD030', 4, 5, NULL);  -- Đã hủy
+GO
+
+-- Chi tiết hóa đơn HD001 (id=1)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (1, 2, 2, 30000, 60000),   -- Cà phê sữa x 2
+    (1, 11, 1, 45000, 45000),  -- Trà đào cam sả
+    (1, 29, 1, 20000, 20000);  -- Nước ép dưa hấu
+
+-- Chi tiết hóa đơn HD002 (id=2)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (2, 1, 1, 25000, 25000),   -- Cà phê đen
+    (2, 16, 1, 35000, 35000),  -- Trà chanh
+    (2, 19, 1, 29000, 29000);  -- Nước ép cam
+
+-- Chi tiết hóa đơn HD003 (id=3)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (3, 6, 3, 45000, 135000),  -- Cappuccino x 3
+    (3, 31, 2, 55000, 110000); -- Sinh tố bơ x 2
+
+-- Chi tiết hóa đơn HD004 (id=4)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (4, 4, 1, 40000, 40000),   -- Americano
+    (4, 13, 1, 5000, 5000);    -- Trà gừng mật ong
+
+-- Chi tiết hóa đơn HD005 (id=5)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (5, 8, 2, 50000, 100000),  -- Mocha x 2
+    (5, 24, 1, 45000, 45000),  -- Sinh tố dâu
+    (5, 36, 1, 30000, 30000);  -- Sinh tố chuối
+
+-- Chi tiết hóa đơn HD006 (id=6)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (6, 39, 2, 65000, 130000), -- Đá xay matcha x 2
+    (6, 42, 2, 60000, 120000), -- Đá xay cafe x 2
+    (6, 48, 1, 70000, 70000);  -- Matcha latte
+
+-- Chi tiết hóa đơn HD007 (id=7)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (7, 3, 1, 35000, 35000),   -- Bạc xỉu
+    (7, 17, 1, 45000, 45000),  -- Trà vải
+    (7, 33, 1, 15000, 15000);  -- Sinh tố dưa hấu
+
+-- Chi tiết hóa đơn HD008 (id=8)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (8, 9, 2, 38000, 76000),   -- Cà phê muối x 2
+    (8, 27, 2, 55000, 110000), -- Sinh tố bơ x 2
+    (8, 44, 2, 65000, 130000); -- Đá xay dâu tây x 2
+
+-- Chi tiết hóa đơn HD009 (id=9)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (9, 5, 1, 35000, 35000),   -- Espresso
+    (9, 12, 1, 50000, 50000),  -- Trà sen vàng
+    (9, 38, 1, -18000, -18000); -- (Lỗi test)
+
+-- Chi tiết hóa đơn HD010 (id=10)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (10, 40, 3, 65000, 195000), -- Đá xay chocolate x 3
+    (10, 46, 2, 55000, 110000), -- Matcha sữa đặc x 2
+    (10, 51, 1, 60000, 60000),  -- Hot chocolate
+    (10, 53, 1, 55000, 55000);  -- Chocolate sữa
+
+-- Chi tiết hóa đơn HD011 (id=11)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (11, 7, 2, 45000, 90000),  -- Latte x 2
+    (11, 18, 2, 35000, 70000); -- Trà hoa cúc x 2
+
+-- Chi tiết hóa đơn HD012 (id=12)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (12, 14, 1, 40000, 40000), -- Trà ô long
+    (12, 22, 1, 45000, 45000), -- Nước ép dứa
+    (12, 35, 1, 4000, 4000);   -- Sinh tố mixed fruits
+
+-- Chi tiết hóa đơn HD013 (id=13)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (13, 41, 2, 65000, 130000), -- Đá xay dâu tây x 2
+    (13, 49, 2, 60000, 120000), -- Matcha đá xay x 2
+    (13, 55, 1, -15000, -15000); -- (Lỗi test)
+
+-- Chi tiết hóa đơn HD014 (id=14)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (14, 10, 2, 55000, 110000), -- Cold Brew x 2
+    (14, 15, 1, 10000, 10000); -- Trà bạc hà
+
+-- Chi tiết hóa đơn HD015 (id=15)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (15, 25, 2, 55000, 110000), -- Sinh tố xoài x 2
+    (15, 32, 2, 55000, 110000), -- Sinh tố dâu x 2
+    (15, 47, 2, 65000, 130000); -- Matcha trái cây x 2
+
+-- Chi tiết hóa đơn HD016 (id=16)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (16, 20, 2, 50000, 100000), -- Nước ép táo x 2
+    (16, 23, 1, -2000, -2000);  -- (Lỗi test)
+
+-- Chi tiết hóa đơn HD017 (id=17)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (17, 43, 3, 65000, 195000), -- Đá xay bạc hà x 3
+    (17, 50, 3, 65000, 195000), -- Matcha yogurt x 3
+    (17, 56, 2, 60000, 120000); -- White chocolate x 2
+
+-- Chi tiết hóa đơn HD018 (id=18)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (18, 1, 2, 25000, 50000),   -- Cà phê đen x 2
+    (18, 2, 2, 30000, 60000),   -- Cà phê sữa x 2
+    (18, 4, 1, 40000, 40000),   -- Americano
+    (18, 5, 1, 35000, 35000);   -- Espresso
+
+-- Chi tiết hóa đơn HD019 (id=19)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (19, 11, 1, 45000, 45000),  -- Trà đào cam sả
+    (19, 16, 1, 35000, 35000);  -- Trà chanh
+
+-- Chi tiết hóa đơn HD020 (id=20)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (20, 29, 3, 40000, 120000), -- Nước ép dưa hấu x 3
+    (20, 31, 3, 55000, 165000), -- Sinh tố bơ x 3
+    (20, 39, 2, 65000, 130000); -- Đá xay matcha x 2
+
+-- Chi tiết hóa đơn HD021 (id=21)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (21, 7, 1, 45000, 45000),   -- Latte
+    (21, 8, 1, 50000, 50000);   -- Mocha
+
+-- Chi tiết hóa đơn HD022 (id=22)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (22, 17, 2, 45000, 90000),  -- Trà vải x 2
+    (22, 18, 1, 40000, 40000),  -- Trà hoa cúc
+    (22, 19, 1, 45000, 45000);  -- Nước ép cam
+
+-- Chi tiết hóa đơn HD023 (id=23)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (23, 27, 2, 55000, 110000), -- Sinh tố bơ x 2
+    (23, 34, 2, 45000, 90000),  -- Sinh tố dưa hấu x 2
+    (23, 37, 1, 55000, 55000);  -- Sinh tố sapoche
+
+-- Chi tiết hóa đơn HD024 (id=24)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (24, 12, 1, 50000, 50000),  -- Trà sen vàng
+    (24, 14, 1, 45000, 45000);  -- Trà ô long
+
+-- Chi tiết hóa đơn HD025 (id=25)
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (25, 44, 3, 65000, 195000), -- Đá xay dâu tây x 3
+    (25, 45, 2, 60000, 120000); -- Đá xay cafe x 2
+
+-- Chi tiết hóa đơn HD026 (id=26) - Hóa đơn hoàn thành ngày 05/04
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (26, 3, 2, 35000, 70000),   -- Bạc xỉu x 2
+    (26, 6, 1, 45000, 45000),   -- Cappuccino
+    (26, 10, 1, 55000, 55000);  -- Cold Brew
+
+-- Chi tiết hóa đơn HD027 (id=27) - Đang chờ xử lý
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (27, 2, 2, 30000, 60000),   -- Cà phê sữa x 2
+    (27, 11, 1, 45000, 45000);  -- Trà đào cam sả
+
+-- Chi tiết hóa đơn HD028 (id=28) - Đang chờ xử lý
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (28, 31, 2, 55000, 110000), -- Sinh tố bơ x 2
+    (28, 39, 2, 65000, 130000); -- Đá xay matcha x 2
+
+-- Chi tiết hóa đơn HD029 (id=29) - Đã hủy
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (29, 4, 1, 40000, 40000),   -- Americano
+    (29, 16, 1, 35000, 35000),  -- Trà chanh
+    (29, 21, 1, 45000, 45000);  -- Nước ép cam
+
+-- Chi tiết hóa đơn HD030 (id=30) - Đã hủy
+INSERT INTO BILLDETAIL (bill_id, drink_id, quantity, unit_price, total_price)
+VALUES 
+    (30, 41, 3, 65000, 195000), -- Đá xay dâu tây x 3
+    (30, 46, 2, 55000, 110000), -- Matcha sữa đặc x 2
+    (30, 52, 1, 50000, 50000);  -- Chocolate đá
+
+-- Thêm lịch sử tích điểm cho khách hàng
+INSERT INTO POINT (bonus_point, deduct_point, transaction_date, note, customer_id, bill_id)
+VALUES 
+    (12, 0, '2026-03-01', N'Tích điểm hóa đơn #HD001', 1, 1),
+    (8, 0, '2026-03-02', N'Tích điểm hóa đơn #HD002', 2, 2),
+    (21, 0, '2026-03-03', N'Tích điểm hóa đơn #HD003', 3, 3),
+    (4, 0, '2026-03-05', N'Tích điểm hóa đơn #HD004', 1, 4),
+    (17, 0, '2026-03-07', N'Tích điểm hóa đơn #HD005', 4, 5),
+    (32, 0, '2026-03-10', N'Tích điểm hóa đơn #HD006', 5, 6),
+    (9, 0, '2026-03-12', N'Tích điểm hóa đơn #HD007', 2, 7),
+    (28, 0, '2026-03-15', N'Tích điểm hóa đơn #HD008', 3, 8),
+    (6, 0, '2026-03-18', N'Tích điểm hóa đơn #HD009', 6, 9),
+    (45, 0, '2026-03-20', N'Tích điểm hóa đơn #HD010', 5, 10),
+    (15, 0, '2026-03-22', N'Tích điểm hóa đơn #HD011', 1, 11),
+    (8, 0, '2026-03-25', N'Tích điểm hóa đơn #HD012', 7, 12),
+    (23, 0, '2026-03-27', N'Tích điểm hóa đơn #HD013', 4, 13),
+    (12, 0, '2026-03-28', N'Tích điểm hóa đơn #HD014', 2, 14),
+    (34, 0, '2026-03-29', N'Tích điểm hóa đơn #HD015', 8, 15),
+    (9, 0, '2026-03-30', N'Tích điểm hóa đơn #HD016', 3, 16),
+    (56, 0, '2026-03-31', N'Tích điểm hóa đơn #HD017', 5, 17),
+    (18, 0, '2026-04-01', N'Tích điểm hóa đơn #HD018', 1, 18),
+    (7, 0, '2026-04-01', N'Tích điểm hóa đơn #HD019', 2, 19),
+    (42, 0, '2026-04-02', N'Tích điểm hóa đơn #HD020', 5, 20),
+    (9, 0, '2026-04-02', N'Tích điểm hóa đơn #HD021', 3, 21),
+    (15, 0, '2026-04-03', N'Tích điểm hóa đơn #HD022', 4, 22),
+    (28, 0, '2026-04-03', N'Tích điểm hóa đơn #HD023', 6, 23),
+    (6, 0, '2026-04-04', N'Tích điểm hóa đơn #HD024', 1, 24),
+    (34, 0, '2026-04-04', N'Tích điểm hóa đơn #HD025', 7, 25),
+    (19, 0, '2026-04-05', N'Tích điểm hóa đơn #HD026', 2, 26);

@@ -1,5 +1,6 @@
 package com.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -7,6 +8,7 @@ import javax.persistence.TypedQuery;
 
 import com.entity.BillDetail;
 import com.entity.BillDetailId;
+import com.entity.BillItemInfo;
 import com.entity.Drink;
 import com.util.JpaUtil;
 
@@ -167,5 +169,37 @@ public class BillDetailDAO implements CrudDAO<BillDetail, Integer> {
             return 0;
         existing.setQuantity(quantity);
         return update(existing);
+    }
+
+    /**
+     * Lấy danh sách chi tiết bill kèm tên đồ uống
+     */
+    public List<BillItemInfo> getBillItemsWithDrinkName(Integer billId) {
+        EntityManager em = JpaUtil.getEntityManager();
+        List<BillItemInfo> result = new ArrayList<>();
+        try {
+            String sql = "SELECT bd.drink_id, d.name, bd.quantity, bd.unit_price, bd.total_price " +
+                    "FROM BILLDETAIL bd " +
+                    "INNER JOIN DRINK d ON bd.drink_id = d.id " +
+                    "WHERE bd.bill_id = ?1";
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> rows = em.createNativeQuery(sql)
+                    .setParameter(1, billId)
+                    .getResultList();
+
+            for (Object[] row : rows) {
+                BillItemInfo item = new BillItemInfo();
+                item.setDrinkId(((Number) row[0]).intValue());
+                item.setDrinkName((String) row[1]);
+                item.setQuantity(((Number) row[2]).intValue());
+                item.setUnitPrice(((Number) row[3]).doubleValue());
+                item.setTotalPrice(((Number) row[4]).doubleValue());
+                result.add(item);
+            }
+            return result;
+        } finally {
+            em.close();
+        }
     }
 }

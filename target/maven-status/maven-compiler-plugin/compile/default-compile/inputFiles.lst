@@ -12,6 +12,8 @@
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/Bill.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/BillDetail.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/BillDetailId.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/BillDetailInfo.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/BillItemInfo.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/Category.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/Customer.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/DiscountCode.java
@@ -21,11 +23,13 @@
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/Role.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/entity/User.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/AuthServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/BillServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/CategoryServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/DrinkServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/ForgotPasswordServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/HomeServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/LogoutServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/ReportServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/StaffServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/util/AuthFilter.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/util/AuthUtil.java

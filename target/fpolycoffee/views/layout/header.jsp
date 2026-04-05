@@ -131,6 +131,9 @@
                                             </a>
                                         </li>
                                         <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
                                             <a class="dropdown-item"
                                                 href="${pageContext.request.contextPath}/manager/drinks">
                                                 <i class="bi bi-cup-straw me-2"></i> Quản lý đồ uống
@@ -144,6 +147,27 @@
                                                 href="${pageContext.request.contextPath}/manager/staff">
                                                 <i class="bi bi-people me-2"></i> Quản lý nhân viên
                                             </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item"
+                                                href="${pageContext.request.contextPath}/manager/bills">
+                                                <i class="bi bi-receipt me-2"></i> Quản lý hóa đơn
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item"
+                                                href="${pageContext.request.contextPath}/manager/report">
+                                                <i class="bi bi-graph-up me-2"></i> Thống kê & Báo cáo
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <hr class="dropdown-divider">
                                         </li>
                                     </ul>
                                 </li>

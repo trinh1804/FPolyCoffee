@@ -8,6 +8,7 @@ import javax.persistence.TypedQuery;
 
 import com.entity.Bill;
 import com.entity.BillDetail;
+import com.entity.BillDetailInfo;
 import com.util.JpaUtil;
 
 public class BillDAO implements CrudDAO<Bill, Integer> {
@@ -275,6 +276,131 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
                     .setParameter(2, to)
                     .getSingleResult();
             return result != null ? result : 0.0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Lấy danh sách bill có phân trang
+     */
+    public List<Bill> findAllWithPagination(int page, int pageSize) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT b FROM Bill b ORDER BY b.createdAt DESC", Bill.class)
+                    .setFirstResult((page - 1) * pageSize)
+                    .setMaxResults(pageSize)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Đếm tổng số bill
+     */
+    public int countAll() {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            Long count = em.createQuery("SELECT COUNT(b) FROM Bill b", Long.class)
+                    .getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Lấy danh sách bill theo trạng thái có phân trang
+     */
+    public List<Bill> findByStatusWithPagination(int status, int page, int pageSize) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            return em.createQuery("SELECT b FROM Bill b WHERE b.status = ?1 ORDER BY b.createdAt DESC", Bill.class)
+                    .setParameter(1, status)
+                    .setFirstResult((page - 1) * pageSize)
+                    .setMaxResults(pageSize)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Đếm số bill theo trạng thái
+     */
+    public int countByStatus(int status) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            Long count = em.createQuery("SELECT COUNT(b) FROM Bill b WHERE b.status = ?1", Long.class)
+                    .setParameter(1, status)
+                    .getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Hủy đơn hàng (chỉ hủy được khi đang chờ)
+     */
+    public int cancelBill(Integer billId) {
+        return updateStatus(billId, Bill.STATUS_CANCEL);
+    }
+
+    /**
+     * Hoàn thành đơn hàng
+     */
+    public int completeBill(Integer billId) {
+        Bill bill = findById(billId);
+        if (bill == null)
+            return 0;
+
+        // Chỉ hoàn thành được đơn đang chờ (status = 0)
+        if (bill.getStatus() != Bill.STATUS_WAITING) {
+            return 0;
+        }
+
+        return updateStatus(billId, Bill.STATUS_FINISH);
+    }
+
+    /**
+     * Lấy thông tin chi tiết bill kèm tên nhân viên (dùng native query)
+     */
+    public BillDetailInfo getBillDetailInfo(Integer billId) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            String sql = "SELECT b.id, b.code, b.created_at, b.total_price, b.discount_amount, " +
+                    "b.payment_method, b.status, b.user_id, u.fullname as staff_name, " +
+                    "b.customer_id, c.fullname as customer_name " +
+                    "FROM BILL b " +
+                    "LEFT JOIN [USER] u ON b.user_id = u.id " +
+                    "LEFT JOIN CUSTOMER c ON b.customer_id = c.id " +
+                    "WHERE b.id = ?1";
+
+            @SuppressWarnings("unchecked")
+            List<Object[]> results = em.createNativeQuery(sql)
+                    .setParameter(1, billId)
+                    .getResultList();
+
+            if (results.isEmpty())
+                return null;
+
+            Object[] row = results.get(0);
+            BillDetailInfo info = new BillDetailInfo();
+            info.setId(((Number) row[0]).intValue());
+            info.setCode((String) row[1]);
+            info.setCreatedAt((java.util.Date) row[2]);
+            info.setTotalPrice(((Number) row[3]).doubleValue());
+            info.setDiscountAmount(((Number) row[4]).doubleValue());
+            info.setPaymentMethod(((Boolean) row[5]) != null ? (Boolean) row[5] : false);
+            info.setStatus(((Number) row[6]).intValue());
+            info.setUserId(row[7] != null ? ((Number) row[7]).intValue() : null);
+            info.setStaffName((String) row[8]);
+            info.setCustomerId(row[9] != null ? ((Number) row[9]).intValue() : null);
+            info.setCustomerName((String) row[10]);
+
+            return info;
         } finally {
             em.close();
         }
