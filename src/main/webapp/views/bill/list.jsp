@@ -7,17 +7,20 @@
                     <i class="bi bi-receipt me-2"></i>Quản lý hóa đơn
                 </h4>
 
-                <c:if test="${not empty message}">
+                <!-- Hiển thị thông báo từ session rồi xóa ngay -->
+                <c:if test="${not empty sessionScope.message}">
                     <div class="alert alert-success alert-dismissible fade show">
-                        <i class="bi bi-check-circle-fill me-1"></i> ${message}
+                        <i class="bi bi-check-circle-fill me-1"></i> ${sessionScope.message}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                    <c:remove var="message" scope="session" />
                 </c:if>
-                <c:if test="${not empty error}">
+                <c:if test="${not empty sessionScope.error}">
                     <div class="alert alert-danger alert-dismissible fade show">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i> ${error}
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> ${sessionScope.error}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
+                    <c:remove var="error" scope="session" />
                 </c:if>
 
                 <!-- Tab lọc theo trạng thái -->
@@ -172,3 +175,5 @@
                         </c:if>
                     </div>
                 </div>
+
+                <%@ include file="/views/layout/footer.jsp" %>

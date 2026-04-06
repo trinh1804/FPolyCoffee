@@ -63,8 +63,7 @@
                                     <div class="mt-2">
                                         <img src="${pageContext.request.contextPath}/uploads/${category.image}"
                                             class="img-thumbnail" style="max-height:70px" alt="Hình hiện tại">
-                                        <div class="form-text">Hình hiện tại (giữ nguyên nếu không chọn ảnh mới)
-                                        </div>
+                                        <div class="form-text">Hình hiện tại (giữ nguyên nếu không chọn ảnh mới)</div>
                                     </div>
                                 </c:if>
                             </div>
@@ -72,8 +71,7 @@
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-coffee">
                                     <c:if test="${category == null}"><i class="bi bi-save me-1"></i> Thêm mới</c:if>
-                                    <c:if test="${category != null}"><i class="bi bi-check-lg me-1"></i> Cập nhật
-                                    </c:if>
+                                    <c:if test="${category != null}"><i class="bi bi-check-lg me-1"></i> Cập nhật</c:if>
                                 </button>
                                 <c:if test="${category != null}">
                                     <a href="${pageContext.request.contextPath}/manager/categories"
@@ -165,3 +163,5 @@
             </div>
 
         </div>
+
+        <%@ include file="/views/layout/footer.jsp" %>

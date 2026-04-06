@@ -12,6 +12,21 @@
                     </a>
                 </div>
 
+                <!-- Hiển thị thông báo từ session rồi xóa ngay -->
+                <c:if test="${not empty sessionScope.message}">
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <i class="bi bi-check-circle-fill me-1"></i> ${sessionScope.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <c:remove var="message" scope="session" />
+                </c:if>
+                <c:if test="${not empty sessionScope.error}">
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> ${sessionScope.error}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                    <c:remove var="error" scope="session" />
+                </c:if>
                 <c:if test="${not empty error}">
                     <div class="alert alert-danger alert-dismissible fade show">
                         <i class="bi bi-exclamation-triangle-fill me-1"></i> ${error}
@@ -36,8 +51,7 @@
                                         <tr>
                                             <td><strong>Ngày tạo:</strong></td>
                                             <td>
-                                                <fmt:formatDate value="${bill.createdAt}"
-                                                    pattern="dd/MM/yyyy HH:mm:ss" />
+                                                <fmt:formatDate value="${bill.createdAt}" pattern="dd/MM/yyyy" />
                                             </td>
                                         </tr>
                                         <tr>
@@ -121,7 +135,6 @@
                                                     <i class="bi bi-check-lg me-1"></i> Hoàn thành đơn
                                                 </button>
                                             </form>
-
                                             <form action="${pageContext.request.contextPath}/manager/bills/cancel"
                                                 method="post" class="flex-grow-1"
                                                 onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng ${bill.code}?')">
@@ -166,8 +179,7 @@
                                                         </td>
                                                         <td class="text-end fw-semibold" style="color:#c47c3e">
                                                             <fmt:formatNumber value="${item.totalPrice}"
-                                                                pattern="#,##0" />
-                                                            ₫
+                                                                pattern="#,##0" /> ₫
                                                         </td>
                                                     </tr>
                                                 </c:forEach>
@@ -196,3 +208,4 @@
                         </div>
                     </div>
                 </c:if>
+                <%@ include file="/views/layout/footer.jsp" %>

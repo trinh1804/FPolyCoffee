@@ -85,7 +85,6 @@
                             </div>
                             <div class="card-body">
                                 <canvas id="revenueChart" style="width:100%; max-height:350px"></canvas>
-
                                 <div class="row mt-4 pt-2 text-center">
                                     <div class="col-6">
                                         <div class="p-3 rounded" style="background-color:#f0e4d0">
@@ -130,28 +129,23 @@
                                                 <tr>
                                                     <td class="text-center">
                                                         <c:choose>
-                                                            <c:when test="${loop.index == 0}">
-                                                                <span
+                                                            <c:when test="${loop.index == 0}"><span
                                                                     class="badge bg-warning rounded-circle p-2">🥇</span>
                                                             </c:when>
-                                                            <c:when test="${loop.index == 1}">
-                                                                <span
+                                                            <c:when test="${loop.index == 1}"><span
                                                                     class="badge bg-secondary rounded-circle p-2">🥈</span>
                                                             </c:when>
-                                                            <c:when test="${loop.index == 2}">
-                                                                <span
+                                                            <c:when test="${loop.index == 2}"><span
                                                                     class="badge bg-danger rounded-circle p-2">🥉</span>
                                                             </c:when>
-                                                            <c:otherwise>
-                                                                <span
+                                                            <c:otherwise><span
                                                                     class="badge bg-light text-dark rounded-circle p-2">${loop.index+1}</span>
                                                             </c:otherwise>
                                                         </c:choose>
                                                     </td>
                                                     <td class="fw-semibold">${drink.drinkName}</td>
-                                                    <td class="text-center">
-                                                        <span class="badge bg-info">${drink.totalQuantitySold}</span>
-                                                    </td>
+                                                    <td class="text-center"><span
+                                                            class="badge bg-info">${drink.totalQuantitySold}</span></td>
                                                     <td class="text-end fw-semibold" style="color:#c47c3e">
                                                         <fmt:formatNumber value="${drink.totalRevenue}"
                                                             pattern="#,##0" /> ₫
@@ -194,22 +188,18 @@
                             "${label}"${!loop.last ? ',' : ''}
                         </c:forEach>
                     ];
-
                     const revenues = [
                         <c:forEach items="${revenues}" var="rev" varStatus="loop">
                             ${rev}${!loop.last ? ',' : ''}
                         </c:forEach>
                     ];
-
                     const bills = [
                         <c:forEach items="${bills}" var="bill" varStatus="loop">
                             ${bill}${!loop.last ? ',' : ''}
                         </c:forEach>
                     ];
 
-                    // Biểu đồ doanh thu
-                    const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-                    new Chart(revenueCtx, {
+                    new Chart(document.getElementById('revenueChart').getContext('2d'), {
                         type: 'bar',
                         data: {
                             labels: labels,
@@ -224,36 +214,12 @@
                         },
                         options: {
                             responsive: true,
-                            maintainAspectRatio: true,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function (context) {
-                                            let value = context.raw;
-                                            return 'Doanh thu: ' + value.toLocaleString('vi-VN') + ' ₫';
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        callback: function (value) {
-                                            return value.toLocaleString('vi-VN') + ' ₫';
-                                        }
-                                    }
-                                }
-                            }
+                            plugins: { tooltip: { callbacks: { label: ctx => 'Doanh thu: ' + ctx.raw.toLocaleString('vi-VN') + ' ₫' } } },
+                            scales: { y: { beginAtZero: true, ticks: { callback: v => v.toLocaleString('vi-VN') + ' ₫' } } }
                         }
                     });
 
-                    // Biểu đồ số lượng đơn hàng
-                    const billsCtx = document.getElementById('billsChart').getContext('2d');
-                    new Chart(billsCtx, {
+                    new Chart(document.getElementById('billsChart').getContext('2d'), {
                         type: 'line',
                         data: {
                             labels: labels,
@@ -273,30 +239,10 @@
                         },
                         options: {
                             responsive: true,
-                            maintainAspectRatio: true,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function (context) {
-                                            return 'Số đơn: ' + context.raw + ' đơn';
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        stepSize: 1,
-                                        callback: function (value) {
-                                            return value + ' đơn';
-                                        }
-                                    }
-                                }
-                            }
+                            plugins: { tooltip: { callbacks: { label: ctx => 'Số đơn: ' + ctx.raw + ' đơn' } } },
+                            scales: { y: { beginAtZero: true, ticks: { stepSize: 1, callback: v => v + ' đơn' } } }
                         }
                     });
                 </script>
+
+                <%@ include file="/views/layout/footer.jsp" %>

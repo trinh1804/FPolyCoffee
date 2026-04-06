@@ -5,17 +5,20 @@
             <i class="bi bi-people me-2"></i>Quản lý nhân viên
         </h4>
 
-        <c:if test="${not empty message}">
+        <!-- Hiển thị thông báo từ session rồi xóa ngay -->
+        <c:if test="${not empty sessionScope.message}">
             <div class="alert alert-success alert-dismissible fade show">
-                <i class="bi bi-check-circle-fill me-1"></i> ${message}
+                <i class="bi bi-check-circle-fill me-1"></i> ${sessionScope.message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
+            <c:remove var="message" scope="session" />
         </c:if>
-        <c:if test="${not empty error}">
+        <c:if test="${not empty sessionScope.error}">
             <div class="alert alert-danger alert-dismissible fade show">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i> ${error}
+                <i class="bi bi-exclamation-triangle-fill me-1"></i> ${sessionScope.error}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
+            <c:remove var="error" scope="session" />
         </c:if>
 
         <!-- Tìm kiếm -->
@@ -161,19 +164,19 @@
                             <ul class="pagination justify-content-center mb-0">
                                 <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
                                     <a class="page-link"
-                                        href="?page=${currentPage-1}&searchName=${searchName}&searchEmail=${searchEmail}&searchPhone=${searchPhone}&status=${selectedStatus}">
+                                        href="?page=${currentPage-1}&searchName=${searchName}&searchEmail=${searchEmail}&status=${selectedStatus}">
                                         <i class="bi bi-chevron-left"></i> Trước
                                     </a>
                                 </li>
                                 <c:forEach begin="1" end="${totalPages}" var="i">
                                     <li class="page-item ${currentPage == i ? 'active' : ''}">
                                         <a class="page-link"
-                                            href="?page=${i}&searchName=${searchName}&searchEmail=${searchEmail}&searchPhone=${searchPhone}&status=${selectedStatus}">${i}</a>
+                                            href="?page=${i}&searchName=${searchName}&searchEmail=${searchEmail}&status=${selectedStatus}">${i}</a>
                                     </li>
                                 </c:forEach>
                                 <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
                                     <a class="page-link"
-                                        href="?page=${currentPage+1}&searchName=${searchName}&searchEmail=${searchEmail}&searchPhone=${searchPhone}&status=${selectedStatus}">
+                                        href="?page=${currentPage+1}&searchName=${searchName}&searchEmail=${searchEmail}&status=${selectedStatus}">
                                         Sau <i class="bi bi-chevron-right"></i>
                                     </a>
                                 </li>
@@ -183,3 +186,5 @@
                 </c:if>
             </div>
         </div>
+
+        <%@ include file="/views/layout/footer.jsp" %>

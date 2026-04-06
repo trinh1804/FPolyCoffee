@@ -9,6 +9,16 @@
                         ${empty staff ? 'Thêm nhân viên mới' : 'Cập nhật thông tin nhân viên'}
                     </div>
                     <div class="card-body p-4">
+
+                        <!-- Hiển thị thông báo lỗi từ session (nếu có) rồi xóa ngay -->
+                        <c:if test="${not empty sessionScope.error}">
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> ${sessionScope.error}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                            <c:remove var="error" scope="session" />
+                        </c:if>
+
                         <form
                             action="${pageContext.request.contextPath}/manager/staff/${empty staff ? 'create' : 'edit'}"
                             method="post">
@@ -64,3 +74,5 @@
                 </div>
             </div>
         </div>
+
+        <%@ include file="/views/layout/footer.jsp" %>

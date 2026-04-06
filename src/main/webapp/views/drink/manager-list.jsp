@@ -5,6 +5,7 @@
             <i class="bi bi-cup-straw me-2"></i>Quản lý đồ uống
         </h4>
 
+        <!-- DrinkServlet dùng req.setAttribute (request scope) → chỉ hiện sau forward -->
         <c:if test="${not empty message}">
             <div class="alert alert-success alert-dismissible fade show">
                 <i class="bi bi-check-circle-fill me-1"></i> ${message}
@@ -244,3 +245,5 @@
                 </div>
             </div>
         </div>
+
+        <%@ include file="/views/layout/footer.jsp" %>
