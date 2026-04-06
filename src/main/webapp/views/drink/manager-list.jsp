@@ -1,246 +1,259 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ include file="/views/layout/header.jsp" %>
+    <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+        <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+            <%@ include file="/views/layout/header.jsp" %>
 
-        <h4 class="fw-bold mb-4" style="color:#3d1f0d">
-            <i class="bi bi-cup-straw me-2"></i>Quản lý đồ uống
-        </h4>
-
-        <c:if test="${not empty message}">
-            <div class="alert alert-success alert-dismissible fade show">
-                <i class="bi bi-check-circle-fill me-1"></i> ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </c:if>
-        <c:if test="${not empty error}">
-            <div class="alert alert-danger alert-dismissible fade show">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i> ${error}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        </c:if>
-
-        <!-- Tìm kiếm -->
-        <div class="card shadow-sm border-0 rounded-3 mb-4">
-            <div class="card-header card-header-mid py-3 border-0">
-                <i class="bi bi-search me-1"></i> Tìm kiếm đồ uống
-            </div>
-            <div class="card-body p-3">
-                <form action="${pageContext.request.contextPath}/manager/drinks" method="get">
-                    <div class="row g-2 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">Tên đồ uống</label>
-                            <input type="text" class="form-control" name="searchName" value="${searchName}"
-                                placeholder="Nhập tên đồ uống">
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">Loại đồ uống</label>
-                            <select class="form-select" name="categoryId">
-                                <option value="0">-- Tất cả --</option>
-                                <c:forEach items="${categories}" var="cat">
-                                    <option value="${cat.id}" ${selectedCategoryId==cat.id ? 'selected' : '' }>
-                                        ${cat.name}</option>
-                                </c:forEach>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">Trạng thái</label>
-                            <select class="form-select" name="status">
-                                <option value="">-- Tất cả --</option>
-                                <option value="active" ${selectedStatus=='active' ? 'selected' : '' }>Đang bán</option>
-                                <option value="inactive" ${selectedStatus=='inactive' ? 'selected' : '' }>Ngừng bán
-                                </option>
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold small">&nbsp;</label>
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-coffee flex-grow-1">
-                                    <i class="bi bi-search me-1"></i> Tìm
-                                </button>
-                                <a href="${pageContext.request.contextPath}/manager/drinks"
-                                    class="btn btn-outline-secondary flex-grow-1">
-                                    <i class="bi bi-arrow-repeat me-1"></i> Làm mới
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Nút thêm -->
-        <div class="mb-3">
-            <button type="button" class="btn btn-coffee" data-bs-toggle="modal" data-bs-target="#addDrinkModal">
-                <i class="bi bi-plus-circle me-1"></i> Thêm đồ uống mới
-            </button>
-        </div>
-
-        <!-- Danh sách -->
-        <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header card-header-mid py-3 border-0 d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-list me-1"></i> Danh sách đồ uống</span>
-                <span class="badge bg-light text-dark">${totalRecords} sản phẩm</span>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr class="text-center">
-                                <th>ID</th>
-                                <th>Hình</th>
-                                <th class="text-start">Tên đồ uống</th>
-                                <th>Giá (VNĐ)</th>
-                                <th>Danh mục</th>
-                                <th class="text-start">Mô tả</th>
-                                <th>Trạng thái</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach items="${drinks}" var="drink">
-                                <tr>
-                                    <td class="text-center text-muted small">${drink.id}</td>
-                                    <td class="text-center">
-                                        <c:if test="${not empty drink.image}">
-                                            <img src="${pageContext.request.contextPath}/uploads/${drink.image}"
-                                                class="rounded" style="width:44px;height:44px;object-fit:cover" alt="">
-                                        </c:if>
-                                        <c:if test="${empty drink.image}">
-                                            <div class="rounded bg-light d-inline-flex align-items-center justify-content-center"
-                                                style="width:44px;height:44px">
-                                                <i class="bi bi-cup text-muted"></i>
-                                            </div>
-                                        </c:if>
-                                    </td>
-                                    <td><strong>${drink.name}</strong></td>
-                                    <td class="text-end fw-semibold" style="color:#c47c3e;white-space:nowrap">
-                                        ${drink.price} ₫
-                                    </td>
-                                    <td class="text-center">
-                                        <c:forEach items="${categories}" var="cat">
-                                            <c:if test="${cat.id == drink.categoryId}">
-                                                <span class="badge bg-secondary">${cat.name}</span>
-                                            </c:if>
-                                        </c:forEach>
-                                    </td>
-                                    <td class="text-muted small" style="max-width:150px">${drink.description}</td>
-                                    <td class="text-center">
-                                        <span class="badge ${drink.active ? 'bg-success' : 'bg-secondary'}">
-                                            <i class="bi ${drink.active ? 'bi-check-circle' : 'bi-x-circle'} me-1"></i>
-                                            ${drink.active ? 'Đang bán' : 'Ngừng bán'}
-                                        </span>
-                                    </td>
-                                    <td class="text-center" style="white-space:nowrap">
-                                        <a href="${pageContext.request.contextPath}/manager/drinks/edit?id=${drink.id}"
-                                            class="btn btn-sm btn-warning" title="Sửa">
-                                            <i class="bi bi-pencil"></i>
-                                        </a>
-                                        <form action="${pageContext.request.contextPath}/manager/drinks/delete"
-                                            method="post" class="d-inline"
-                                            onsubmit="return confirm('Bạn có chắc muốn ẩn đồ uống này?')">
-                                            <input type="hidden" name="id" value="${drink.id}">
-                                            <button type="submit" class="btn btn-sm btn-danger" title="Ẩn">
-                                                <i class="bi bi-eye-slash"></i>
-                                            </button>
-                                        </form>
-                                    </td>
-                                </tr>
-                            </c:forEach>
-                            <c:if test="${empty drinks}">
-                                <tr>
-                                    <td colspan="8" class="text-center text-muted py-5">
-                                        <i class="bi bi-inbox fs-2 d-block mb-2"></i>
-                                        Không tìm thấy đồ uống nào
-                                    </td>
-                                </tr>
-                            </c:if>
-                        </tbody>
-                    </table>
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="section-title mb-0">
+                        <span class="material-symbols-outlined text-primary">coffee</span>
+                        Quản lý đồ uống
+                    </h1>
+                    <button type="button" onclick="document.getElementById('addDrinkModal').classList.remove('hidden')"
+                        class="btn btn-primary">
+                        <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                        Thêm đồ uống
+                    </button>
                 </div>
 
-                <!-- Phân trang -->
-                <c:if test="${totalPages > 1}">
-                    <div class="p-3">
-                        <nav>
-                            <ul class="pagination justify-content-center mb-0">
-                                <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
-                                    <a class="page-link"
-                                        href="?page=${currentPage-1}&searchName=${searchName}&categoryId=${selectedCategoryId}&status=${selectedStatus}">
-                                        <i class="bi bi-chevron-left"></i> Trước
-                                    </a>
-                                </li>
-                                <c:forEach begin="1" end="${totalPages}" var="i">
-                                    <li class="page-item ${currentPage == i ? 'active' : ''}">
-                                        <a class="page-link"
-                                            href="?page=${i}&searchName=${searchName}&categoryId=${selectedCategoryId}&status=${selectedStatus}">${i}</a>
-                                    </li>
-                                </c:forEach>
-                                <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
-                                    <a class="page-link"
-                                        href="?page=${currentPage+1}&searchName=${searchName}&categoryId=${selectedCategoryId}&status=${selectedStatus}">
-                                        Sau <i class="bi bi-chevron-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                <c:if test="${not empty message}">
+                    <div class="alert alert-success"><span
+                            class="material-symbols-outlined text-[18px]">check_circle</span> ${message}</div>
                 </c:if>
-            </div>
-        </div>
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger"><span class="material-symbols-outlined text-[18px]">error</span>
+                        ${error}</div>
+                </c:if>
 
-        <!-- Modal Thêm đồ uống -->
-        <div class="modal fade" id="addDrinkModal" tabindex="-1">
-            <div class="modal-dialog">
-                <div class="modal-content border-0 rounded-3">
-                    <div class="modal-header card-header-coffee border-0">
-                        <h5 class="modal-title"><i class="bi bi-plus-circle me-1"></i> Thêm đồ uống mới</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <!-- Search -->
+                <div class="pc-card mb-6">
+                    <div class="pc-card-header">
+                        <span class="material-symbols-outlined text-primary text-[18px]">search</span>
+                        Tìm kiếm đồ uống
                     </div>
-                    <form action="${pageContext.request.contextPath}/manager/drinks/add" method="post"
-                        enctype="multipart/form-data">
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Tên đồ
-                                    uống</label>
-                                <input type="text" class="form-control" name="name" placeholder="Nhập tên đồ uống"
-                                    required>
+                    <div class="p-5">
+                        <form action="${pageContext.request.contextPath}/manager/drinks" method="get">
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                                <div>
+                                    <label class="form-label">Tên đồ uống</label>
+                                    <input type="text" class="form-control" name="searchName" value="${searchName}"
+                                        placeholder="Nhập tên">
+                                </div>
+                                <div>
+                                    <label class="form-label">Danh mục</label>
+                                    <select class="form-select" name="categoryId">
+                                        <option value="0">-- Tất cả --</option>
+                                        <c:forEach items="${categories}" var="cat">
+                                            <option value="${cat.id}" ${selectedCategoryId==cat.id ? 'selected' : '' }>
+                                                ${cat.name}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="form-label">Trạng thái</label>
+                                    <select class="form-select" name="status">
+                                        <option value="">-- Tất cả --</option>
+                                        <option value="active" ${selectedStatus=='active' ? 'selected' : '' }>Đang bán
+                                        </option>
+                                        <option value="inactive" ${selectedStatus=='inactive' ? 'selected' : '' }>Ngừng
+                                            bán</option>
+                                    </select>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button type="submit" class="btn btn-primary flex-1">
+                                        <span class="material-symbols-outlined text-[18px]">search</span> Tìm
+                                    </button>
+                                    <a href="${pageContext.request.contextPath}/manager/drinks"
+                                        class="btn btn-outline flex-1">
+                                        <span class="material-symbols-outlined text-[18px]">refresh</span>
+                                    </a>
+                                </div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Giá
-                                    (VNĐ)</label>
-                                <input type="number" class="form-control" name="price" step="1000"
-                                    placeholder="VD: 35000" required>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold"><span class="text-danger">*</span> Danh
-                                    mục</label>
-                                <select class="form-select" name="categoryId" required>
-                                    <option value="">-- Chọn danh mục --</option>
-                                    <c:forEach items="${categories}" var="cat">
-                                        <option value="${cat.id}">${cat.name}</option>
-                                    </c:forEach>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Mô tả</label>
-                                <textarea class="form-control" name="description" rows="3"
-                                    placeholder="Mô tả đồ uống..."></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Hình ảnh</label>
-                                <input type="file" class="form-control" name="image" accept="image/*">
-                            </div>
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" name="active" id="activeCheck" checked>
-                                <label class="form-check-label" for="activeCheck">Đang bán</label>
-                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="pc-card">
+                    <div class="pc-card-header justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary text-[18px]">list</span>
+                            Danh sách đồ uống
                         </div>
-                        <div class="modal-footer border-0">
-                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-save me-1"></i> Thêm
+                        <span class="badge badge-secondary">${totalRecords} sản phẩm</span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="data-table w-full">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">ID</th>
+                                    <th class="text-center">Hình</th>
+                                    <th>Tên đồ uống</th>
+                                    <th class="text-right">Giá</th>
+                                    <th class="text-center">Danh mục</th>
+                                    <th>Mô tả</th>
+                                    <th class="text-center">Trạng thái</th>
+                                    <th class="text-center">Thao tác</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach items="${drinks}" var="drink">
+                                    <tr>
+                                        <td class="text-center text-on-surface-variant text-sm">${drink.id}</td>
+                                        <td class="text-center">
+                                            <c:if test="${not empty drink.image}">
+                                                <img src="${pageContext.request.contextPath}/uploads/${drink.image}"
+                                                    class="rounded-xl object-cover mx-auto"
+                                                    style="width:44px;height:44px" alt="">
+                                            </c:if>
+                                            <c:if test="${empty drink.image}">
+                                                <div
+                                                    class="rounded-xl bg-surface-container w-11 h-11 mx-auto flex items-center justify-center">
+                                                    <span
+                                                        class="material-symbols-outlined text-outline text-[20px]">coffee</span>
+                                                </div>
+                                            </c:if>
+                                        </td>
+                                        <td class="font-semibold text-on-surface">${drink.name}</td>
+                                        <td class="text-right font-semibold text-primary" style="white-space:nowrap">
+                                            <fmt:formatNumber value="${drink.price}" pattern="#,##0" /> ₫
+                                        </td>
+                                        <td class="text-center">
+                                            <c:forEach items="${categories}" var="cat">
+                                                <c:if test="${cat.id == drink.categoryId}">
+                                                    <span class="badge badge-info">${cat.name}</span>
+                                                </c:if>
+                                            </c:forEach>
+                                        </td>
+                                        <td class="text-on-surface-variant text-sm"
+                                            style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+                                            ${drink.description}</td>
+                                        <td class="text-center">
+                                            <c:choose>
+                                                <c:when test="${drink.active}">
+                                                    <span class="badge badge-success"><span
+                                                            class="material-symbols-outlined text-[14px]">check_circle</span>Đang
+                                                        bán</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge badge-secondary"><span
+                                                            class="material-symbols-outlined text-[14px]">block</span>Ngừng
+                                                        bán</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="flex items-center justify-center gap-2">
+                                                <a href="${pageContext.request.contextPath}/manager/drinks/edit?id=${drink.id}"
+                                                    class="btn btn-secondary btn-sm" title="Sửa">
+                                                    <span class="material-symbols-outlined text-[16px]">edit</span>
+                                                </a>
+                                                <form action="${pageContext.request.contextPath}/manager/drinks/delete"
+                                                    method="post" class="inline"
+                                                    onsubmit="return confirm('Bạn có chắc muốn ẩn đồ uống này?')">
+                                                    <input type="hidden" name="id" value="${drink.id}">
+                                                    <button type="submit" class="btn btn-danger btn-sm" title="Ẩn">
+                                                        <span
+                                                            class="material-symbols-outlined text-[16px]">visibility_off</span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty drinks}">
+                                    <tr>
+                                        <td colspan="8" class="text-center py-12 text-on-surface-variant">
+                                            <span
+                                                class="material-symbols-outlined text-5xl block mb-2 opacity-30">inbox</span>
+                                            Không tìm thấy đồ uống nào
+                                        </td>
+                                    </tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <c:if test="${totalPages > 1}">
+                        <div class="p-5 flex justify-center gap-1">
+                            <a href="?page=${currentPage-1}&searchName=${searchName}&categoryId=${selectedCategoryId}&status=${selectedStatus}"
+                                class="page-btn ${currentPage == 1 ? 'disabled' : ''}">
+                                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                            </a>
+                            <c:forEach begin="1" end="${totalPages}" var="i">
+                                <a href="?page=${i}&searchName=${searchName}&categoryId=${selectedCategoryId}&status=${selectedStatus}"
+                                    class="page-btn ${currentPage == i ? 'active' : ''}">${i}</a>
+                            </c:forEach>
+                            <a href="?page=${currentPage+1}&searchName=${searchName}&categoryId=${selectedCategoryId}&status=${selectedStatus}"
+                                class="page-btn ${currentPage == totalPages ? 'disabled' : ''}">
+                                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                            </a>
+                        </div>
+                    </c:if>
+                </div>
+
+                <!-- Add Drink Modal -->
+                <div id="addDrinkModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4"
+                    style="background:rgba(0,0,0,0.4)">
+                    <div class="pc-card w-full max-w-md max-h-[90vh] overflow-y-auto">
+                        <div class="pc-card-header justify-between"
+                            style="background: linear-gradient(135deg, #3d1f0d, #874210);">
+                            <div class="flex items-center gap-2 text-white">
+                                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                                <span class="font-headline font-bold text-white">Thêm đồ uống mới</span>
+                            </div>
+                            <button onclick="document.getElementById('addDrinkModal').classList.add('hidden')"
+                                class="text-white/70 hover:text-white">
+                                <span class="material-symbols-outlined">close</span>
                             </button>
                         </div>
-                    </form>
+                        <div class="p-6">
+                            <form action="${pageContext.request.contextPath}/manager/drinks/add" method="post"
+                                enctype="multipart/form-data">
+                                <div class="mb-4">
+                                    <label class="form-label">Tên đồ uống <span class="text-error">*</span></label>
+                                    <input type="text" class="form-control" name="name" placeholder="Nhập tên" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Giá (VNĐ) <span class="text-error">*</span></label>
+                                    <input type="number" class="form-control" name="price" step="1000"
+                                        placeholder="VD: 35000" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Danh mục <span class="text-error">*</span></label>
+                                    <select class="form-select" name="categoryId" required>
+                                        <option value="">-- Chọn danh mục --</option>
+                                        <c:forEach items="${categories}" var="cat">
+                                            <option value="${cat.id}">${cat.name}</option>
+                                        </c:forEach>
+                                    </select>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Mô tả</label>
+                                    <textarea class="form-control" name="description" rows="3"
+                                        placeholder="Mô tả đồ uống..."></textarea>
+                                </div>
+                                <div class="mb-4">
+                                    <label class="form-label">Hình ảnh</label>
+                                    <input type="file" class="form-control" name="image" accept="image/*">
+                                </div>
+                                <div class="flex items-center gap-2 mb-5">
+                                    <input type="checkbox" id="activeChk" name="active" class="w-4 h-4 accent-primary"
+                                        checked>
+                                    <label for="activeChk" class="text-sm text-on-surface cursor-pointer">Đang
+                                        bán</label>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button type="submit" class="btn btn-primary flex-1 py-3">
+                                        <span class="material-symbols-outlined text-[18px]">save</span> Thêm
+                                    </button>
+                                    <button type="button"
+                                        onclick="document.getElementById('addDrinkModal').classList.add('hidden')"
+                                        class="btn btn-outline flex-1 py-3">Hủy</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
+
+                <%@ include file="/views/layout/footer.jsp" %>
