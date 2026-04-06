@@ -3,6 +3,7 @@
         <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
             <%@ include file="/views/layout/header.jsp" %>
 
+
                 <div class="flex items-center justify-between mb-6">
                     <h1 class="section-title mb-0">
                         <span class="material-symbols-outlined text-primary">coffee</span>
