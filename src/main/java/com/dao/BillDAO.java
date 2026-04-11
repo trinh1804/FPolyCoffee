@@ -4,11 +4,13 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 import com.entity.Bill;
 import com.entity.BillDetail;
 import com.entity.BillDetailInfo;
+import com.entity.BillItemInfo;
 import com.util.JpaUtil;
 
 public class BillDAO implements CrudDAO<Bill, Integer> {
@@ -59,7 +61,7 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
 
     @Override
     public List<Bill> findAll() {
-        return findBySql("SELECT b FROM Bill b ORDER BY b.createdAt DESC");
+        return findBySql("SELECT b FROM Bill b ORDER BY b.id DESC");
     }
 
     @Override
@@ -103,7 +105,7 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
     public List<Bill> findByUserId(Integer userId) {
         return findBySql(
                 "SELECT b FROM Bill b WHERE b.userId = ?1 " +
-                        "ORDER BY CASE b.status WHEN 0 THEN 1 WHEN 1 THEN 2 ELSE 3 END, b.createdAt DESC",
+                        "ORDER BY CASE b.status WHEN 0 THEN 1 WHEN 1 THEN 2 ELSE 3 END, b.id DESC",
                 userId);
     }
 
@@ -115,13 +117,13 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
     public List<Bill> findByDateRange(Date from, Date to) {
         return findBySql(
                 "SELECT b FROM Bill b WHERE b.status = 1 " +
-                        "AND b.createdAt BETWEEN ?1 AND ?2 ORDER BY b.createdAt DESC",
+                        "AND b.createdAt BETWEEN ?1 AND ?2 ORDER BY b.id DESC",
                 from, to);
     }
 
     /**
      * Tạo bill + danh sách chi tiết trong cùng 1 transaction.
-     * 
+     *
      * @return id của bill vừa tạo, hoặc 0 nếu thất bại
      */
     public int createWithBillDetails(Bill bill, List<BillDetail> details) {
@@ -214,6 +216,30 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
+    /**
+     * Gỡ mã giảm giá khỏi bill đang chờ (đặt lại về NULL / 0).
+     */
+    public int removeDiscount(Integer billId) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            int rows = em.createQuery(
+                    "UPDATE Bill b SET b.discountId = NULL, b.discountAmount = 0 " +
+                            "WHERE b.id = ?1 AND b.status = 0")
+                    .setParameter(1, billId)
+                    .executeUpdate();
+            em.getTransaction().commit();
+            return rows;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            e.printStackTrace();
+            return 0;
+        } finally {
+            em.close();
+        }
+    }
+
     /** Gán khách hàng vào bill (để tích điểm) */
     public int assignCustomer(Integer billId, Integer customerId) {
         EntityManager em = JpaUtil.getEntityManager();
@@ -281,13 +307,11 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /**
-     * Lấy danh sách bill có phân trang
-     */
+    /** Lấy danh sách bill có phân trang */
     public List<Bill> findAllWithPagination(int page, int pageSize) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT b FROM Bill b ORDER BY b.createdAt DESC", Bill.class)
+            return em.createQuery("SELECT b FROM Bill b ORDER BY b.id DESC", Bill.class)
                     .setFirstResult((page - 1) * pageSize)
                     .setMaxResults(pageSize)
                     .getResultList();
@@ -296,9 +320,7 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /**
-     * Đếm tổng số bill
-     */
+    /** Đếm tổng số bill */
     public int countAll() {
         EntityManager em = JpaUtil.getEntityManager();
         try {
@@ -310,13 +332,11 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /**
-     * Lấy danh sách bill theo trạng thái có phân trang
-     */
+    /** Lấy danh sách bill theo trạng thái có phân trang */
     public List<Bill> findByStatusWithPagination(int status, int page, int pageSize) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
-            return em.createQuery("SELECT b FROM Bill b WHERE b.status = ?1 ORDER BY b.createdAt DESC", Bill.class)
+            return em.createQuery("SELECT b FROM Bill b WHERE b.status = ?1 ORDER BY b.id DESC", Bill.class)
                     .setParameter(1, status)
                     .setFirstResult((page - 1) * pageSize)
                     .setMaxResults(pageSize)
@@ -326,9 +346,7 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /**
-     * Đếm số bill theo trạng thái
-     */
+    /** Đếm số bill theo trạng thái */
     public int countByStatus(int status) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
@@ -341,32 +359,23 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /**
-     * Hủy đơn hàng (chỉ hủy được khi đang chờ)
-     */
+    /** Hủy đơn hàng (chỉ hủy được khi đang chờ) */
     public int cancelBill(Integer billId) {
         return updateStatus(billId, Bill.STATUS_CANCEL);
     }
 
-    /**
-     * Hoàn thành đơn hàng
-     */
+    /** Hoàn thành đơn hàng */
     public int completeBill(Integer billId) {
         Bill bill = findById(billId);
         if (bill == null)
             return 0;
-
-        // Chỉ hoàn thành được đơn đang chờ (status = 0)
         if (bill.getStatus() != Bill.STATUS_WAITING) {
             return 0;
         }
-
         return updateStatus(billId, Bill.STATUS_FINISH);
     }
 
-    /**
-     * Lấy thông tin chi tiết bill kèm tên nhân viên (dùng native query)
-     */
+    /** Lấy thông tin chi tiết bill kèm tên nhân viên (dùng native query) */
     public BillDetailInfo getBillDetailInfo(Integer billId) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
@@ -401,6 +410,40 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
             info.setCustomerName((String) row[10]);
 
             return info;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Sinh mã hóa đơn tuần tự: HD001, HD002, ...
+     *
+     * BUG FIX: Dùng BIGINT thay INT để tránh overflow khi phần số > 2 tỷ.
+     * Chỉ xét mã HDxxx có phần số từ 1–9 chữ số (LEN tổng 3–11).
+     * Các mã dạng timestamp dài hơn bị loại bỏ.
+     */
+    public String generateNextCode() {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            // Dùng BIGINT (không phải INT) để tránh tràn số với mã dài
+            // LEN BETWEEN 3 AND 11 = "HD" + 1..9 chữ số
+            String sql = "SELECT MAX(CAST(SUBSTRING(b.code, 3, LEN(b.code) - 2) AS BIGINT)) " +
+                    "FROM Bill b " +
+                    "WHERE b.code LIKE 'HD%' " +
+                    "  AND ISNUMERIC(SUBSTRING(b.code, 3, LEN(b.code) - 2)) = 1 " +
+                    "  AND LEN(b.code) BETWEEN 3 AND 11 " + // tối đa 9 chữ số → không overflow BIGINT
+                    "  AND SUBSTRING(b.code, 3, 1) BETWEEN '0' AND '9'"; // chắc chắn là số nguyên dương
+
+            Object result = em.createNativeQuery(sql).getSingleResult();
+            long nextNum = 1;
+            if (result != null) {
+                nextNum = ((Number) result).longValue() + 1;
+            }
+            return String.format("HD%03d", nextNum);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Fallback an toàn: timestamp ngắn gọn
+            return "HD" + (System.currentTimeMillis() % 1_000_000);
         } finally {
             em.close();
         }

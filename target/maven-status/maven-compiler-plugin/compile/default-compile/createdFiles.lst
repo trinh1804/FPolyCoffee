@@ -5,7 +5,9 @@ com\entity\Bill.class
 com\servlet\StaffServlet.class
 com\servlet\CategoryServlet.class
 com\dao\UserDAO.class
+com\servlet\CustomerPointServlet.class
 com\dao\StatisticDAO.class
+com\servlet\ChangePasswordServlet.class
 com\dao\DrinkDAO.class
 com\entity\BillItemInfo.class
 com\servlet\HomeServlet.class
@@ -13,6 +15,7 @@ com\entity\Role.class
 com\servlet\ReportServlet.class
 com\util\Mailer.class
 com\dao\DiscountCodeDAO.class
+com\servlet\ForgotAccountServlet.class
 com\dao\CrudDAO.class
 com\entity\PointTransaction.class
 com\entity\Customer.class
@@ -25,14 +28,17 @@ com\dao\CustomerDAO.class
 com\entity\RevenueByDay.class
 com\entity\BestSellingDrink.class
 com\dao\PointDAO.class
+com\servlet\EmployeeBillServlet.class
 com\servlet\LogoutServlet.class
 com\entity\DiscountCode.class
 com\servlet\DrinkServlet.class
+com\servlet\DiscountCodeServlet.class
 com\util\AuthUtil.class
 com\entity\BillDetail.class
 com\servlet\ForgotPasswordServlet.class
 com\util\Utf8Filter.class
 com\dao\BillDAO.class
+com\servlet\ProfileServlet.class
 com\util\JpaUtil.class
 com\util\ParamUtil.class
 com\entity\User.class
