@@ -8,7 +8,11 @@ com/entity/Role.class
 com/util/Mailer$1.class
 com/entity/PointTransaction.class
 com/servlet/CategoryServlet.class
+com/servlet/EmployeeBillServlet.class
+com/servlet/ProfileServlet.class
 com/dao/UserDAO.class
+com/servlet/ForgotAccountServlet.class
+com/servlet/ChangePasswordServlet.class
 com/servlet/AuthServlet.class
 com/dao/DrinkDAO.class
 com/entity/RevenueByDay.class
@@ -18,6 +22,7 @@ com/entity/Customer.class
 com/dao/StatisticDAO.class
 com/dao/PointDAO.class
 com/servlet/BillServlet.class
+com/servlet/CustomerPointServlet.class
 com/entity/Bill.class
 com/dao/CrudDAO.class
 com/dao/BillDetailDAO.class
@@ -35,6 +40,7 @@ com/dao/CategoryDAO.class
 com/dao/CustomerDAO.class
 com/entity/BillDetail.class
 com/util/Utf8Filter.class
+com/servlet/DiscountCodeServlet.class
 com/dao/DiscountCodeDAO.class
 com/servlet/ReportServlet.class
 com/util/Mailer.class

@@ -1,44 +1,59 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
     <%@ include file="/views/layout/header.jsp" %>
 
-        <div class="row justify-content-center">
-            <div class="col-sm-10 col-md-6 col-lg-5">
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header card-header-mid py-3 border-0">
-                        <i class="bi bi-question-circle me-1"></i> Quên mật khẩu
+        <div class="flex justify-center py-8">
+            <div class="w-full max-w-md">
+                <div class="pc-card overflow-hidden">
+                    <!-- Header -->
+                    <div class="px-8 pt-8 pb-5" style="background: linear-gradient(135deg, #3d1f0d, #874210);">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                                <span class="material-symbols-outlined text-white text-xl">help</span>
+                            </div>
+                            <div>
+                                <h2 class="font-headline font-bold text-xl text-white">Quên mật khẩu</h2>
+                                <p class="text-primary-fixed-dim text-xs">Lấy lại quyền truy cập tài khoản</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body p-4">
+
+                    <div class="p-8">
                         <c:if test="${not empty message}">
                             <div class="alert alert-success">
-                                <i class="bi bi-check-circle-fill me-1"></i> ${message}
+                                <span class="material-symbols-outlined text-[18px]">check_circle</span>
+                                ${message}
                             </div>
                         </c:if>
                         <c:if test="${not empty error}">
                             <div class="alert alert-danger">
-                                <i class="bi bi-exclamation-triangle-fill me-1"></i> ${error}
+                                <span class="material-symbols-outlined text-[18px]">error</span>
+                                ${error}
                             </div>
                         </c:if>
 
-                        <p class="text-muted small mb-4">
+                        <p class="text-on-surface-variant text-sm mb-6 leading-relaxed">
                             Vui lòng nhập email đã đăng ký. Hệ thống sẽ gửi mật khẩu mới đến email của bạn.
                         </p>
 
                         <form action="${pageContext.request.contextPath}/quen-mat-khau" method="post">
-                            <div class="mb-4">
-                                <label for="email" class="form-label fw-semibold">
-                                    <i class="bi bi-envelope me-1"></i>Email đăng ký
-                                </label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                    placeholder="example@email.com" required>
+                            <div class="mb-6">
+                                <label class="form-label">Email đăng ký</label>
+                                <div class="relative">
+                                    <span
+                                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">mail</span>
+                                    <input type="email" class="form-control pl-10" name="email"
+                                        placeholder="example@email.com" required>
+                                </div>
                             </div>
-
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-coffee">
-                                    <i class="bi bi-send me-1"></i> Gửi yêu cầu
+                            <div class="flex flex-col gap-3">
+                                <button type="submit" class="btn btn-primary w-full py-3">
+                                    <span class="material-symbols-outlined text-[18px]">send</span>
+                                    Gửi yêu cầu
                                 </button>
                                 <a href="${pageContext.request.contextPath}/dang-nhap"
-                                    class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-1"></i> Quay lại đăng nhập
+                                    class="btn btn-outline w-full py-3">
+                                    <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+                                    Quay lại đăng nhập
                                 </a>
                             </div>
                         </form>

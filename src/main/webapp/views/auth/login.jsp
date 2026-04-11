@@ -1,68 +1,79 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
     <%@ include file="/views/layout/header.jsp" %>
 
-        <div class="row justify-content-center">
-            <div class="col-sm-10 col-md-6 col-lg-5 col-xl-4">
-                <div class="card shadow-sm border-0 rounded-3 overflow-hidden">
+        <div class="flex justify-center items-start py-8">
+            <div class="w-full max-w-md">
 
-                    <!-- Header card -->
-                    <div class="card-header text-center py-4 border-0 card-header-coffee">
-                        <div class="fs-1 mb-1"><i class="bi bi-cup-hot-fill me-2"></i></div>
-                        <h4 class="mb-0 fw-bold">Đăng nhập hệ thống</h4>
-                        <small class="opacity-75">FPolyCoffee Management</small>
+                <!-- Card -->
+                <div class="pc-card overflow-hidden">
+                    <!-- Header -->
+                    <div class="px-8 pt-10 pb-6 text-center"
+                        style="background: linear-gradient(135deg, #3d1f0d, #874210);">
+                        <div class="w-16 h-16 rounded-2xl bg-white/15 flex items-center justify-center mx-auto mb-4">
+                            <span class="material-symbols-outlined text-white text-3xl"
+                                style="font-variation-settings: 'FILL' 1">local_cafe</span>
+                        </div>
+                        <h2 class="font-headline font-black text-2xl text-white mb-1">Đăng nhập hệ thống</h2>
+                        <p class="text-primary-fixed-dim text-sm">FPolyCoffee Management</p>
                     </div>
 
-                    <div class="card-body p-4">
+                    <!-- Body -->
+                    <div class="p-8">
                         <c:if test="${not empty message}">
-                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill me-1"></i> ${message}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            <div class="alert alert-danger">
+                                <span class="material-symbols-outlined text-[18px]">error</span>
+                                ${message}
                             </div>
                         </c:if>
 
                         <form action="${pageContext.request.contextPath}/dang-nhap" method="post">
-                            <div class="mb-3">
-                                <label for="email" class="form-label fw-semibold">
-                                    <i class="bi bi-envelope me-1"></i>Email
-                                </label>
-                                <input type="email" class="form-control" id="email" name="email"
-                                    placeholder="example@email.com" required>
+                            <div class="mb-5">
+                                <label class="form-label">Email</label>
+                                <div class="relative">
+                                    <span
+                                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">mail</span>
+                                    <input type="email" class="form-control pl-10" name="email"
+                                        placeholder="example@email.com" required>
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label for="password" class="form-label fw-semibold">
-                                    <i class="bi bi-lock me-1"></i>Mật khẩu
-                                </label>
-                                <input type="password" class="form-control" id="password" name="password"
-                                    placeholder="Nhập mật khẩu" required>
+                            <div class="mb-5">
+                                <label class="form-label">Mật khẩu</label>
+                                <div class="relative">
+                                    <span
+                                        class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">lock</span>
+                                    <input type="password" class="form-control pl-10" name="password"
+                                        placeholder="Nhập mật khẩu" required>
+                                </div>
                             </div>
 
-                            <div class="mb-4 form-check">
-                                <input type="checkbox" class="form-check-input" id="remember">
-                                <label class="form-check-label" for="remember">Ghi nhớ đăng nhập</label>
+                            <div class="flex items-center gap-2 mb-6">
+                                <input type="checkbox" id="remember" class="w-4 h-4 accent-primary">
+                                <label for="remember" class="text-sm text-on-surface-variant cursor-pointer">Ghi nhớ
+                                    đăng nhập</label>
                             </div>
 
-                            <div class="d-grid">
-                                <button type="submit" class="btn btn-coffee py-2">
-                                    <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
-                                </button>
-                            </div>
+                            <button type="submit" class="btn btn-primary w-full py-3 text-base">
+                                <span class="material-symbols-outlined text-[20px]">login</span>
+                                Đăng nhập
+                            </button>
                         </form>
 
-                        <hr class="my-3">
-
-                        <div class="d-flex flex-column align-items-center gap-1">
+                        <div class="border-t border-outline-variant mt-6 pt-6 flex flex-col items-center gap-2">
                             <a href="${pageContext.request.contextPath}/quen-mat-khau"
-                                class="text-decoration-none small">
-                                <i class="bi bi-question-circle me-1"></i>Quên mật khẩu?
+                                class="text-sm text-primary hover:underline flex items-center gap-1 no-underline">
+                                <span class="material-symbols-outlined text-[16px]">help</span>
+                                Quên mật khẩu?
                             </a>
                             <a href="${pageContext.request.contextPath}/quen-tai-khoan"
-                                class="text-decoration-none small">
-                                <i class="bi bi-person me-1"></i>Quên tài khoản?
+                                class="text-sm text-primary hover:underline flex items-center gap-1 no-underline">
+                                <span class="material-symbols-outlined text-[16px]">person_search</span>
+                                Quên tài khoản?
                             </a>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
 

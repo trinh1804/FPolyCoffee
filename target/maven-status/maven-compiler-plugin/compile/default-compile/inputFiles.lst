@@ -25,10 +25,16 @@
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/AuthServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/BillServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/CategoryServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/ChangePasswordServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/CustomerPointServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/DiscountCodeServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/DrinkServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/EmployeeBillServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/ForgotAccountServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/ForgotPasswordServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/HomeServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/LogoutServlet.java
+/Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/ProfileServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/ReportServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/servlet/StaffServlet.java
 /Users/trinhpham/JAV202/FPolyCoffee/src/main/java/com/util/AuthFilter.java
