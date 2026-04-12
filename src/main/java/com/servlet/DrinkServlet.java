@@ -202,14 +202,24 @@ public class DrinkServlet extends HttpServlet {
         }
     }
 
-    /** Xóa vật lý — chỉ dùng khi admin cần xóa hoàn toàn */
+    /** Xóa vật lý nếu không có bill, ngược lại chỉ ẩn */
     private void delete(HttpServletRequest req) {
         int id = ParamUtil.getInt(req, "id");
         Drink drink = drinkDAO.findById(id);
-        if (drink != null) {
-            int r = drinkDAO.softDelete(id); // soft-delete trước khi cho xóa hẳn
+        if (drink == null) {
+            req.getSession().setAttribute("error", "Không tìm thấy đồ uống!");
+            return;
+        }
+        if (drinkDAO.isUsedInBill(id)) {
+            int r = drinkDAO.softDelete(id);
             req.getSession().setAttribute(r > 0 ? "message" : "error",
-                    r > 0 ? "Đã ẩn \"" + drink.getName() + "\"!" : "Thao tác thất bại!");
+                    r > 0
+                            ? "\"" + drink.getName() + "\" đang có trong bill nên đã được ẩn thay vì xóa!"
+                            : "Thao tác thất bại!");
+        } else {
+            int r = drinkDAO.delete(id);
+            req.getSession().setAttribute(r > 0 ? "message" : "error",
+                    r > 0 ? "Đã xóa \"" + drink.getName() + "\" thành công!" : "Xóa thất bại!");
         }
     }
 

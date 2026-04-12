@@ -168,13 +168,24 @@
                                                     action="${pageContext.request.contextPath}/manager/drinks/toggle-status"
                                                     method="post" class="inline"
                                                     onsubmit="return confirm('${msg} đồ uống này?')">
-
+                                                    <input type="hidden" name="id" value="${drink.id}">
                                                     <button type="submit" class="btn btn-icon ${drink.active ? 'btn-outline' :
                                                         'btn-success'}"
                                                         title="${drink.active ? 'Ngừng bán' : 'Mở bán lại'}">
                                                         <span class="material-symbols-outlined text-[16px]">
                                                             ${drink.active ? 'visibility_off' : 'visibility'}
                                                         </span>
+                                                    </button>
+                                                </form>
+
+                                                <!-- Delete -->
+                                                <form action="${pageContext.request.contextPath}/manager/drinks/delete"
+                                                    method="post" class="inline"
+                                                    onsubmit="return confirm('Xóa đồ uống \'${drink.name}\'?')">
+                                                    <input type="hidden" name="id" value="${drink.id}">
+                                                    <button type="submit" class="btn btn-icon btn-danger" title="Xóa">
+                                                        <span
+                                                            class="material-symbols-outlined text-[16px]">delete</span>
                                                     </button>
                                                 </form>
 
@@ -345,25 +356,14 @@
                     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
                     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-                    function openEditModal(id, name, price, catId, desc, active) {
-                        document.getElementById('editDrinkId').value = id;
-                        document.getElementById('editDrinkName').value = name;
-                        document.getElementById('editDrinkPrice').value = price;
-                        document.getElementById('editDrinkDesc').value = desc;
-                        document.getElementById('editDrinkCat').value = catId;
-                        document.getElementById('editDrinkActive').checked = active;
-                        openModal('editModal');
-                    }
-
                     function openEditModal(btn) {
-                        const id = btn.dataset.id;
-                        const name = btn.dataset.name;
-                        const price = btn.dataset.price;
-                        const category = btn.dataset.category;
-                        const description = btn.dataset.description;
-                        const active = btn.dataset.active === "true";
-
-                        console.log({ id, name, price, category, description, active });
+                        document.getElementById('editDrinkId').value = btn.dataset.id;
+                        document.getElementById('editDrinkName').value = btn.dataset.name;
+                        document.getElementById('editDrinkPrice').value = btn.dataset.price;
+                        document.getElementById('editDrinkDesc').value = btn.dataset.description;
+                        document.getElementById('editDrinkCat').value = btn.dataset.category;
+                        document.getElementById('editDrinkActive').checked = btn.dataset.active === "true";
+                        openModal('editModal');
                     }
                 </script>
 
