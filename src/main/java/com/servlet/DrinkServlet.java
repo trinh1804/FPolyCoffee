@@ -22,7 +22,7 @@ import com.util.ParamUtil;
         "/manager/drinks/add",
         "/manager/drinks/edit",
         "/manager/drinks/delete",
-        "/manager/drinks/toggle-status"
+        "/manager/drinks/toggle-status" // ← MỚI: mở/ẩn đồ uống
 })
 @MultipartConfig
 public class DrinkServlet extends HttpServlet {
@@ -76,6 +76,10 @@ public class DrinkServlet extends HttpServlet {
         req.setAttribute("currentPage", page);
         req.setAttribute("totalPages", totalPages);
         req.setAttribute("totalRecords", totalRecords);
+
+        // Flash messages từ redirect
+        transferFlash(req, "message");
+        transferFlash(req, "error");
 
         // Flash messages từ redirect
         transferFlash(req, "message");
@@ -202,24 +206,14 @@ public class DrinkServlet extends HttpServlet {
         }
     }
 
-    /** Xóa vật lý nếu không có bill, ngược lại chỉ ẩn */
+    /** Xóa vật lý — chỉ dùng khi admin cần xóa hoàn toàn */
     private void delete(HttpServletRequest req) {
         int id = ParamUtil.getInt(req, "id");
         Drink drink = drinkDAO.findById(id);
-        if (drink == null) {
-            req.getSession().setAttribute("error", "Không tìm thấy đồ uống!");
-            return;
-        }
-        if (drinkDAO.isUsedInBill(id)) {
-            int r = drinkDAO.softDelete(id);
+        if (drink != null) {
+            int r = drinkDAO.softDelete(id); // soft-delete trước khi cho xóa hẳn
             req.getSession().setAttribute(r > 0 ? "message" : "error",
-                    r > 0
-                            ? "\"" + drink.getName() + "\" đang có trong bill nên đã được ẩn thay vì xóa!"
-                            : "Thao tác thất bại!");
-        } else {
-            int r = drinkDAO.delete(id);
-            req.getSession().setAttribute(r > 0 ? "message" : "error",
-                    r > 0 ? "Đã xóa \"" + drink.getName() + "\" thành công!" : "Xóa thất bại!");
+                    r > 0 ? "Đã ẩn \"" + drink.getName() + "\"!" : "Thao tác thất bại!");
         }
     }
 

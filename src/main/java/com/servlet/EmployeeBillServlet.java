@@ -49,6 +49,7 @@ import com.util.ParamUtil;
         "/employee/bills",
         "/employee/bills/create",
         "/employee/bills/order",
+        "/employee/bills/qr",
         "/employee/bills/add-drink",
         "/employee/bills/update-qty",
         "/employee/bills/remove-drink",
@@ -86,6 +87,8 @@ public class EmployeeBillServlet extends HttpServlet {
 
         if (uri.endsWith("/create")) {
             handleCreate(req, resp, user);
+        } else if (uri.contains("/qr")) {
+            showQrPage(req, resp, user);
         } else if (uri.contains("/order")) {
             showOrderPage(req, resp, user);
         } else {
@@ -188,13 +191,14 @@ public class EmployeeBillServlet extends HttpServlet {
                 return;
             }
 
+            // Tự động tắt mã giảm giá hết hạn
+            discountCodeDAO.autoDisableExpired();
+
             List<BillItemInfo> items = billDetailDAO.getBillItemsWithDrinkName(billId);
             List<Category> categories = categoryDAO.findAllActive();
             List<Drink> drinks = drinkDAO.findAllActive();
-            // Chỉ lấy các mã đang hoạt động và còn trong hạn để hiển thị nút chọn nhanh
-            List<DiscountCode> availableDiscounts = discountCodeDAO.findAll().stream()
-                    .filter(dc -> dc.isActive())
-                    .collect(java.util.stream.Collectors.toList());
+            // Chỉ lấy mã còn hiệu lực (active=true VÀ trong khoảng ngày)
+            List<DiscountCode> availableDiscounts = discountCodeDAO.findValidDiscounts();
 
             Customer customer = bill.getCustomerId() != null
                     ? customerDAO.findById(bill.getCustomerId())
@@ -222,6 +226,29 @@ public class EmployeeBillServlet extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             req.getSession().setAttribute("error", "Đã xảy ra lỗi khi mở phiếu! Vui lòng thử lại.");
+            resp.sendRedirect(req.getContextPath() + "/employee/bills");
+        }
+    }
+
+    /** Hiển thị trang QR thanh toán toàn màn hình */
+    private void showQrPage(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws ServletException, IOException {
+        int billId = ParamUtil.getInt(req, "id");
+        if (billId <= 0) {
+            resp.sendRedirect(req.getContextPath() + "/employee/bills");
+            return;
+        }
+        try {
+            Bill bill = billDAO.findByIdAndUserId(billId, user.getId());
+            if (bill == null) {
+                req.getSession().setAttribute("error", "Không tìm thấy phiếu!");
+                resp.sendRedirect(req.getContextPath() + "/employee/bills");
+                return;
+            }
+            req.setAttribute("bill", bill);
+            req.getRequestDispatcher("/views/employee/qr.jsp").forward(req, resp);
+        } catch (Exception e) {
+            e.printStackTrace();
             resp.sendRedirect(req.getContextPath() + "/employee/bills");
         }
     }

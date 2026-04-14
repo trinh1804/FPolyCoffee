@@ -68,11 +68,19 @@
                                                     <c:choose>
                                                         <c:when test="${dc.discountType}">
                                                             <span class="badge"
+<<<<<<< HEAD
                                                                 style="background:#E3F2FD;color:#1565C0">% %</span>
                                                         </c:when>
                                                         <c:otherwise>
                                                             <span class="badge"
                                                                 style="background:#FFF3E0;color:#E65100">₫ VNĐ</span>
+=======
+                                                                style="background:#E3F2FD;color:#1565C0">%</span>
+                                                        </c:when>
+                                                        <c:otherwise>
+                                                            <span class="badge"
+                                                                style="background:#FFF3E0;color:#E65100">VNĐ ₫</span>
+>>>>>>> origin/Tam
                                                         </c:otherwise>
                                                     </c:choose>
                                                 </td>
@@ -390,7 +398,11 @@
                                         if (label) label.innerHTML = 'Giá trị giảm (%) <span style="color:#C62828">*</span>';
                                         if (hint) hint.textContent = 'Nhập phần trăm giảm từ 1 đến 100';
                                     } else {
+<<<<<<< HEAD
                                         input.min = '1'; input.max = ''; input.step = '1';
+=======
+                                        input.min = '1'; input.max = ''; input.step = '1000';
+>>>>>>> origin/Tam
                                         input.placeholder = 'VD: 20000';
                                         if (label) label.innerHTML = 'Giá trị giảm (VNĐ) <span style="color:#C62828">*</span>';
                                         if (hint) hint.textContent = 'Nhập số tiền giảm (VNĐ)';

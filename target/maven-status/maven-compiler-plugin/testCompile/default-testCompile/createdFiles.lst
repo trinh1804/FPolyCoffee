@@ -1,8 +1,8 @@
-com/dao/CustomerDAOTest.class
-com/dao/CategoryDAOTest.class
-com/dao/BillDetailDAOTest.class
-com/dao/BillDAOTest.class
-com/dao/PointDAOTest.class
-com/dao/DiscountCodeDAOTest.class
-com/dao/UserDAOTest.class
-com/dao/DrinkDAOTest.class
+com\dao\CustomerDAOTest.class
+com\dao\DrinkDAOTest.class
+com\dao\UserDAOTest.class
+com\dao\CategoryDAOTest.class
+com\dao\DiscountCodeDAOTest.class
+com\dao\BillDetailDAOTest.class
+com\dao\PointDAOTest.class
+com\dao\BillDAOTest.class

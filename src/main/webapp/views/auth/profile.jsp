@@ -54,7 +54,14 @@
                                     <span
                                         class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">phone</span>
                                     <input type="tel" class="form-control pl-10" name="phone"
+<<<<<<< HEAD
                                         value="${sessionScope.user.phone}" placeholder="0xxxxxxxxx" required>
+=======
+                                        value="${sessionScope.user.phone}" placeholder="0xxxxxxxxx" required
+                                        maxlength="10" pattern="0[0-9]{9}"
+                                        title="Số điện thoại phải bắt đầu bằng 0 và có đúng 10 chữ số"
+                                        oninput="this.value=this.value.replace(/\D/g,'').slice(0,10)">
+>>>>>>> origin/Tam
                                 </div>
                                 <c:if test="${not empty phoneError}">
                                     <p class="text-xs text-error mt-1">${phoneError}</p>

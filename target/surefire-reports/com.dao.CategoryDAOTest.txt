@@ -1,4 +1,8 @@
 -------------------------------------------------------------------------------
 Test set: com.dao.CategoryDAOTest
 -------------------------------------------------------------------------------
+<<<<<<< HEAD
 Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in com.dao.CategoryDAOTest
+=======
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.079 s -- in com.dao.CategoryDAOTest
+>>>>>>> origin/Tam
