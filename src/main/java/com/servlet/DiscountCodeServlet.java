@@ -16,11 +16,11 @@ import com.util.AuthUtil;
 import com.util.ParamUtil;
 
 @WebServlet({
-    "/manager/discount-codes",
-    "/manager/discount-codes/add",
-    "/manager/discount-codes/edit",
-    "/manager/discount-codes/delete",
-    "/manager/discount-codes/toggle"
+        "/manager/discount-codes",
+        "/manager/discount-codes/add",
+        "/manager/discount-codes/edit",
+        "/manager/discount-codes/delete",
+        "/manager/discount-codes/toggle"
 })
 public class DiscountCodeServlet extends HttpServlet {
 
@@ -41,6 +41,9 @@ public class DiscountCodeServlet extends HttpServlet {
             req.setAttribute("editing", dao.findById(id));
         }
 
+        // Tự động tắt mã giảm giá đã hết hạn
+        dao.autoDisableExpired();
+
         transferFlash(req, "message");
         transferFlash(req, "error");
 
@@ -57,22 +60,27 @@ public class DiscountCodeServlet extends HttpServlet {
         }
 
         String uri = req.getRequestURI();
-        if      (uri.contains("/add"))    create(req, resp);
-        else if (uri.contains("/edit"))   update(req, resp);
-        else if (uri.contains("/delete")) delete(req, resp);
-        else if (uri.contains("/toggle")) toggle(req, resp);
-        else resp.sendRedirect(req.getContextPath() + "/manager/discount-codes");
+        if (uri.contains("/add"))
+            create(req, resp);
+        else if (uri.contains("/edit"))
+            update(req, resp);
+        else if (uri.contains("/delete"))
+            delete(req, resp);
+        else if (uri.contains("/toggle"))
+            toggle(req, resp);
+        else
+            resp.sendRedirect(req.getContextPath() + "/manager/discount-codes");
     }
 
     // ─────────── CRUD ───────────
 
     private void create(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        String code        = ParamUtil.getString(req, "code");
-        double value       = ParamUtil.getDouble(req, "discountValue", 0);
-        boolean isPercent  = "1".equals(ParamUtil.getString(req, "discountType"));
-        String startStr    = ParamUtil.getString(req, "startDate");
-        String endStr      = ParamUtil.getString(req, "endDate");
-        String note        = ParamUtil.getString(req, "conditionNote", "");
+        String code = ParamUtil.getString(req, "code");
+        double value = ParamUtil.getDouble(req, "discountValue", 0);
+        boolean isPercent = "1".equals(ParamUtil.getString(req, "discountType"));
+        String startStr = ParamUtil.getString(req, "startDate");
+        String endStr = ParamUtil.getString(req, "endDate");
+        String note = ParamUtil.getString(req, "conditionNote", "");
 
         // Validate
         if (code == null || code.isBlank()) {
@@ -82,24 +90,25 @@ public class DiscountCodeServlet extends HttpServlet {
         }
         if (value <= 0 || (isPercent && value > 100)) {
             req.getSession().setAttribute("error", isPercent
-                ? "Phần trăm giảm phải từ 1 – 100!" : "Giá trị giảm phải lớn hơn 0!");
+                    ? "Phần trăm giảm phải từ 1 – 100!"
+                    : "Giá trị giảm phải lớn hơn 0!");
             resp.sendRedirect(req.getContextPath() + "/manager/discount-codes");
             return;
         }
 
         try {
             Date start = SDF.parse(startStr);
-            Date end   = SDF.parse(endStr);
+            Date end = SDF.parse(endStr);
             if (end.before(start)) {
                 req.getSession().setAttribute("error", "Ngày kết thúc phải sau ngày bắt đầu!");
                 resp.sendRedirect(req.getContextPath() + "/manager/discount-codes");
                 return;
             }
             DiscountCode dc = new DiscountCode(null, code.toUpperCase().trim(),
-                value, isPercent, start, end, true, note);
+                    value, isPercent, start, end, true, note);
             int r = dao.create(dc);
             req.getSession().setAttribute(r > 0 ? "message" : "error",
-                r > 0 ? "Thêm mã \"" + dc.getCode() + "\" thành công!" : "Thêm thất bại!");
+                    r > 0 ? "Thêm mã \"" + dc.getCode() + "\" thành công!" : "Thêm thất bại!");
         } catch (Exception e) {
             req.getSession().setAttribute("error", "Ngày không hợp lệ: " + e.getMessage());
         }
@@ -107,12 +116,12 @@ public class DiscountCodeServlet extends HttpServlet {
     }
 
     private void update(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        int    id         = ParamUtil.getInt(req, "id");
-        double value      = ParamUtil.getDouble(req, "discountValue", 0);
+        int id = ParamUtil.getInt(req, "id");
+        double value = ParamUtil.getDouble(req, "discountValue", 0);
         boolean isPercent = "1".equals(ParamUtil.getString(req, "discountType"));
-        String startStr   = ParamUtil.getString(req, "startDate");
-        String endStr     = ParamUtil.getString(req, "endDate");
-        String note       = ParamUtil.getString(req, "conditionNote", "");
+        String startStr = ParamUtil.getString(req, "startDate");
+        String endStr = ParamUtil.getString(req, "endDate");
+        String note = ParamUtil.getString(req, "conditionNote", "");
 
         DiscountCode dc = dao.findById(id);
         if (dc == null) {
@@ -122,7 +131,7 @@ public class DiscountCodeServlet extends HttpServlet {
         }
         try {
             Date start = SDF.parse(startStr);
-            Date end   = SDF.parse(endStr);
+            Date end = SDF.parse(endStr);
             dc.setDiscountValue(value);
             dc.setDiscountType(isPercent);
             dc.setStartDate(start);
@@ -130,7 +139,7 @@ public class DiscountCodeServlet extends HttpServlet {
             dc.setConditionNote(note);
             int r = dao.update(dc);
             req.getSession().setAttribute(r > 0 ? "message" : "error",
-                r > 0 ? "Cập nhật mã \"" + dc.getCode() + "\" thành công!" : "Cập nhật thất bại!");
+                    r > 0 ? "Cập nhật mã \"" + dc.getCode() + "\" thành công!" : "Cập nhật thất bại!");
         } catch (Exception e) {
             req.getSession().setAttribute("error", "Lỗi: " + e.getMessage());
         }
@@ -156,13 +165,16 @@ public class DiscountCodeServlet extends HttpServlet {
             dc.setActive(!dc.isActive());
             dao.update(dc);
             req.getSession().setAttribute("message",
-                "Mã \"" + dc.getCode() + "\" đã " + (dc.isActive() ? "kích hoạt" : "vô hiệu hoá") + "!");
+                    "Mã \"" + dc.getCode() + "\" đã " + (dc.isActive() ? "kích hoạt" : "vô hiệu hoá") + "!");
         }
         resp.sendRedirect(req.getContextPath() + "/manager/discount-codes");
     }
 
     private void transferFlash(HttpServletRequest req, String key) {
         Object v = req.getSession().getAttribute(key);
-        if (v != null) { req.setAttribute(key, v); req.getSession().removeAttribute(key); }
+        if (v != null) {
+            req.setAttribute(key, v);
+            req.getSession().removeAttribute(key);
+        }
     }
 }

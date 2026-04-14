@@ -104,18 +104,18 @@ public class CategoryServlet extends HttpServlet {
             req.setAttribute("error", "Không tìm thấy danh mục!");
             return;
         }
-
-        int drinkCount = categoryDAO.countDrinkInCategory(id);
-        if (drinkCount > 0) {
-            Category cat = categoryDAO.findById(id);
-            cat.setActive(false);
-            categoryDAO.update(cat);
-            req.setAttribute("message",
-                    "Danh mục đang có " + drinkCount + " đồ uống - đã ẩn thay vì xóa.");
-        } else {
-            categoryDAO.delete(id);
-            req.setAttribute("message", "Xóa thành công!");
+        Category cat = categoryDAO.findById(id);
+        if (cat == null) {
+            req.setAttribute("error", "Không tìm thấy danh mục!");
+            return;
         }
+        // Đổi trạng thái ẩn/hiện thay vì xóa vật lý
+        boolean newActive = !cat.isActive();
+        cat.setActive(newActive);
+        categoryDAO.update(cat);
+        req.setAttribute("message",
+                newActive ? "Đã mở hiển thị danh mục «" + cat.getName() + "»!"
+                        : "Đã ẩn danh mục «" + cat.getName() + "»!");
         req.setAttribute("category", null);
     }
 

@@ -34,38 +34,43 @@ import com.util.ParamUtil;
  * Quản lý phiếu bán hàng dành cho Nhân viên.
  *
  * URL patterns:
- *   GET  /employee/bills          — danh sách phiếu của nhân viên
- *   GET  /employee/bills/create   — tạo phiếu mới → chuyển thẳng tới trang chỉnh sửa
- *   GET  /employee/bills/order    — trang thêm/xóa món, áp mã, gán KH, thanh toán
- *   POST /employee/bills/add-drink
- *   POST /employee/bills/update-qty
- *   POST /employee/bills/remove-drink
- *   POST /employee/bills/apply-discount
- *   POST /employee/bills/assign-customer
- *   POST /employee/bills/complete
- *   POST /employee/bills/cancel
+ * GET /employee/bills — danh sách phiếu của nhân viên
+ * GET /employee/bills/create — tạo phiếu mới → chuyển thẳng tới trang chỉnh sửa
+ * GET /employee/bills/order — trang thêm/xóa món, áp mã, gán KH, thanh toán
+ * POST /employee/bills/add-drink
+ * POST /employee/bills/update-qty
+ * POST /employee/bills/remove-drink
+ * POST /employee/bills/apply-discount
+ * POST /employee/bills/assign-customer
+ * POST /employee/bills/complete
+ * POST /employee/bills/cancel
  */
 @WebServlet({
-    "/employee/bills",
-    "/employee/bills/create",
-    "/employee/bills/order",
-    "/employee/bills/add-drink",
-    "/employee/bills/update-qty",
-    "/employee/bills/remove-drink",
-    "/employee/bills/apply-discount",
-    "/employee/bills/assign-customer",
-    "/employee/bills/complete",
-    "/employee/bills/cancel"
+        "/employee/bills",
+        "/employee/bills/create",
+        "/employee/bills/order",
+        "/employee/bills/qr",
+        "/employee/bills/add-drink",
+        "/employee/bills/update-qty",
+        "/employee/bills/remove-drink",
+        "/employee/bills/apply-discount",
+        "/employee/bills/remove-discount",
+        "/employee/bills/assign-customer",
+        "/employee/bills/remove-customer",
+        "/employee/bills/cleanup",
+        "/employee/bills/delete-junk",
+        "/employee/bills/complete",
+        "/employee/bills/cancel"
 })
 public class EmployeeBillServlet extends HttpServlet {
 
-    private final BillDAO          billDAO          = new BillDAO();
-    private final BillDetailDAO    billDetailDAO    = new BillDetailDAO();
-    private final DrinkDAO         drinkDAO         = new DrinkDAO();
-    private final CategoryDAO      categoryDAO      = new CategoryDAO();
-    private final CustomerDAO      customerDAO      = new CustomerDAO();
-    private final DiscountCodeDAO  discountCodeDAO  = new DiscountCodeDAO();
-    private final PointDAO         pointDAO         = new PointDAO();
+    private final BillDAO billDAO = new BillDAO();
+    private final BillDetailDAO billDetailDAO = new BillDetailDAO();
+    private final DrinkDAO drinkDAO = new DrinkDAO();
+    private final CategoryDAO categoryDAO = new CategoryDAO();
+    private final CustomerDAO customerDAO = new CustomerDAO();
+    private final DiscountCodeDAO discountCodeDAO = new DiscountCodeDAO();
+    private final PointDAO pointDAO = new PointDAO();
 
     // ─────────────────────── GET ───────────────────────
 
@@ -77,11 +82,13 @@ public class EmployeeBillServlet extends HttpServlet {
             return;
         }
 
-        User   user = AuthUtil.getUser(req);
-        String uri  = req.getRequestURI();
+        User user = AuthUtil.getUser(req);
+        String uri = req.getRequestURI();
 
         if (uri.endsWith("/create")) {
             handleCreate(req, resp, user);
+        } else if (uri.contains("/qr")) {
+            showQrPage(req, resp, user);
         } else if (uri.contains("/order")) {
             showOrderPage(req, resp, user);
         } else {
@@ -99,16 +106,31 @@ public class EmployeeBillServlet extends HttpServlet {
             return;
         }
 
-        User   user = AuthUtil.getUser(req);
-        String uri  = req.getRequestURI();
+        User user = AuthUtil.getUser(req);
+        String uri = req.getRequestURI();
 
-        if      (uri.contains("/add-drink"))         addDrink(req, resp, user);
-        else if (uri.contains("/update-qty"))         updateQty(req, resp, user);
-        else if (uri.contains("/remove-drink"))       removeDrink(req, resp, user);
-        else if (uri.contains("/apply-discount"))     applyDiscount(req, resp, user);
-        else if (uri.contains("/assign-customer"))    assignCustomer(req, resp, user);
-        else if (uri.contains("/complete"))           completeBill(req, resp, user);
-        else if (uri.contains("/cancel"))             cancelBill(req, resp, user);
+        if (uri.contains("/add-drink"))
+            addDrink(req, resp, user);
+        else if (uri.contains("/update-qty"))
+            updateQty(req, resp, user);
+        else if (uri.contains("/remove-drink"))
+            removeDrink(req, resp, user);
+        else if (uri.contains("/remove-discount"))
+            removeDiscount(req, resp, user);
+        else if (uri.contains("/apply-discount"))
+            applyDiscount(req, resp, user);
+        else if (uri.contains("/remove-customer"))
+            removeCustomer(req, resp, user);
+        else if (uri.contains("/assign-customer"))
+            assignCustomer(req, resp, user);
+        else if (uri.contains("/delete-junk"))
+            deleteJunkBills(req, resp, user);
+        else if (uri.contains("/cleanup"))
+            cleanupBills(req, resp, user);
+        else if (uri.contains("/complete"))
+            completeBill(req, resp, user);
+        else if (uri.contains("/cancel"))
+            cancelBill(req, resp, user);
     }
 
     // ────────────────── Handlers ───────────────────────
@@ -169,25 +191,28 @@ public class EmployeeBillServlet extends HttpServlet {
                 return;
             }
 
-            List<BillItemInfo> items              = billDetailDAO.getBillItemsWithDrinkName(billId);
-            List<Category>     categories         = categoryDAO.findAllActive();
-            List<Drink>        drinks             = drinkDAO.findAllActive();
-            // Chỉ lấy các mã đang hoạt động và còn trong hạn để hiển thị nút chọn nhanh
-            List<DiscountCode> availableDiscounts = discountCodeDAO.findAll().stream()
-                    .filter(dc -> dc.isActive())
-                    .collect(java.util.stream.Collectors.toList());
+            // Tự động tắt mã giảm giá hết hạn
+            discountCodeDAO.autoDisableExpired();
 
-            Customer    customer = bill.getCustomerId() != null
-                    ? customerDAO.findById(bill.getCustomerId()) : null;
+            List<BillItemInfo> items = billDetailDAO.getBillItemsWithDrinkName(billId);
+            List<Category> categories = categoryDAO.findAllActive();
+            List<Drink> drinks = drinkDAO.findAllActive();
+            // Chỉ lấy mã còn hiệu lực (active=true VÀ trong khoảng ngày)
+            List<DiscountCode> availableDiscounts = discountCodeDAO.findValidDiscounts();
+
+            Customer customer = bill.getCustomerId() != null
+                    ? customerDAO.findById(bill.getCustomerId())
+                    : null;
             DiscountCode discount = bill.getDiscountId() != null
-                    ? discountCodeDAO.findById(bill.getDiscountId()) : null;
+                    ? discountCodeDAO.findById(bill.getDiscountId())
+                    : null;
 
-            req.setAttribute("bill",               bill);
-            req.setAttribute("items",              items);
-            req.setAttribute("categories",         categories);
-            req.setAttribute("drinks",             drinks);
-            req.setAttribute("customer",           customer);
-            req.setAttribute("discount",           discount);
+            req.setAttribute("bill", bill);
+            req.setAttribute("items", items);
+            req.setAttribute("categories", categories);
+            req.setAttribute("drinks", drinks);
+            req.setAttribute("customer", customer);
+            req.setAttribute("discount", discount);
             req.setAttribute("availableDiscounts", availableDiscounts);
 
             // Flash messages từ redirect
@@ -205,10 +230,33 @@ public class EmployeeBillServlet extends HttpServlet {
         }
     }
 
+    /** Hiển thị trang QR thanh toán toàn màn hình */
+    private void showQrPage(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws ServletException, IOException {
+        int billId = ParamUtil.getInt(req, "id");
+        if (billId <= 0) {
+            resp.sendRedirect(req.getContextPath() + "/employee/bills");
+            return;
+        }
+        try {
+            Bill bill = billDAO.findByIdAndUserId(billId, user.getId());
+            if (bill == null) {
+                req.getSession().setAttribute("error", "Không tìm thấy phiếu!");
+                resp.sendRedirect(req.getContextPath() + "/employee/bills");
+                return;
+            }
+            req.setAttribute("bill", bill);
+            req.getRequestDispatcher("/views/employee/qr.jsp").forward(req, resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            resp.sendRedirect(req.getContextPath() + "/employee/bills");
+        }
+    }
+
     /** Thêm đồ uống vào phiếu (hoặc tăng số lượng nếu đã có) */
     private void addDrink(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException {
-        int billId  = ParamUtil.getInt(req, "billId");
+        int billId = ParamUtil.getInt(req, "billId");
         int drinkId = ParamUtil.getInt(req, "drinkId");
 
         if (!isOwnerAndWaiting(billId, user)) {
@@ -224,9 +272,9 @@ public class EmployeeBillServlet extends HttpServlet {
     /** Cập nhật số lượng; qty=0 → xóa dòng */
     private void updateQty(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException {
-        int billId  = ParamUtil.getInt(req, "billId");
+        int billId = ParamUtil.getInt(req, "billId");
         int drinkId = ParamUtil.getInt(req, "drinkId");
-        int qty     = ParamUtil.getInt(req, "qty");
+        int qty = ParamUtil.getInt(req, "qty");
 
         if (!isOwnerAndWaiting(billId, user)) {
             resp.sendRedirect(req.getContextPath() + "/employee/bills");
@@ -241,7 +289,7 @@ public class EmployeeBillServlet extends HttpServlet {
     /** Xóa hẳn một dòng đồ uống khỏi phiếu */
     private void removeDrink(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException {
-        int billId  = ParamUtil.getInt(req, "billId");
+        int billId = ParamUtil.getInt(req, "billId");
         int drinkId = ParamUtil.getInt(req, "drinkId");
 
         if (!isOwnerAndWaiting(billId, user)) {
@@ -254,11 +302,31 @@ public class EmployeeBillServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/employee/bills/order?id=" + billId);
     }
 
+    /** Gỡ mã giảm giá khỏi phiếu */
+    private void removeDiscount(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws IOException {
+        int billId = ParamUtil.getInt(req, "billId");
+
+        if (!isOwnerAndWaiting(billId, user)) {
+            resp.sendRedirect(req.getContextPath() + "/employee/bills");
+            return;
+        }
+
+        int rows = billDAO.removeDiscount(billId);
+        if (rows > 0) {
+            billDAO.recalcTotal(billId);
+            req.getSession().setAttribute("discountMsg", "Đã gỡ mã giảm giá.");
+        } else {
+            req.getSession().setAttribute("discountError", "Gỡ mã thất bại!");
+        }
+        resp.sendRedirect(req.getContextPath() + "/employee/bills/order?id=" + billId);
+    }
+
     /** Áp dụng mã giảm giá */
     private void applyDiscount(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException {
-        int    billId = ParamUtil.getInt(req, "billId");
-        String code   = ParamUtil.getString(req, "discountCode");
+        int billId = ParamUtil.getInt(req, "billId");
+        String code = ParamUtil.getString(req, "discountCode");
 
         if (!isOwnerAndWaiting(billId, user)) {
             resp.sendRedirect(req.getContextPath() + "/employee/bills");
@@ -268,17 +336,17 @@ public class EmployeeBillServlet extends HttpServlet {
         DiscountCode dc = discountCodeDAO.findByCode(code);
         if (dc == null) {
             req.getSession().setAttribute("discountError",
-                "Mã \"" + code + "\" không hợp lệ hoặc đã hết hạn!");
+                    "Mã \"" + code + "\" không hợp lệ hoặc đã hết hạn!");
         } else {
             // Lấy subtotal (chưa giảm) để tính chiết khấu
             Bill bill = billDAO.findById(billId);
             double subtotal = bill.getTotalPrice() + bill.getDiscountAmount();
-            double amount   = discountCodeDAO.calculateDiscount(dc, subtotal);
+            double amount = discountCodeDAO.calculateDiscount(dc, subtotal);
 
             billDAO.applyDiscount(billId, dc.getId(), amount);
             billDAO.recalcTotal(billId);
             req.getSession().setAttribute("discountMsg",
-                "Áp dụng thành công! Giảm " + String.format("%,.0f", amount) + " ₫");
+                    "Áp dụng thành công! Giảm " + String.format("%,.0f", amount) + " ₫");
         }
 
         resp.sendRedirect(req.getContextPath() + "/employee/bills/order?id=" + billId);
@@ -290,8 +358,8 @@ public class EmployeeBillServlet extends HttpServlet {
      */
     private void assignCustomer(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException {
-        int    billId = ParamUtil.getInt(req, "billId");
-        String phone  = ParamUtil.getString(req, "phone");
+        int billId = ParamUtil.getInt(req, "billId");
+        String phone = ParamUtil.getString(req, "phone");
 
         if (!isOwnerAndWaiting(billId, user)) {
             resp.sendRedirect(req.getContextPath() + "/employee/bills");
@@ -314,8 +382,8 @@ public class EmployeeBillServlet extends HttpServlet {
         if (customer != null) {
             billDAO.assignCustomer(billId, customer.getId());
             req.getSession().setAttribute("customerMsg",
-                "Đã gán khách: " + customer.getFullName()
-                + " — Điểm hiện tại: " + customer.getPoint());
+                    "Đã gán khách: " + customer.getFullName()
+                            + " — Điểm hiện tại: " + customer.getPoint());
         } else {
             req.getSession().setAttribute("customerError", "Không thể tạo khách hàng!");
         }
@@ -331,7 +399,7 @@ public class EmployeeBillServlet extends HttpServlet {
      */
     private void completeBill(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException {
-        int     billId        = ParamUtil.getInt(req, "billId");
+        int billId = ParamUtil.getInt(req, "billId");
         boolean paymentOnline = "online".equals(ParamUtil.getString(req, "paymentMethod"));
 
         if (!isOwnerAndWaiting(billId, user)) {
@@ -359,8 +427,8 @@ public class EmployeeBillServlet extends HttpServlet {
                 pointDAO.earnPoint(finished.getCustomerId(), billId, finished.getTotalPrice());
             }
             req.getSession().setAttribute("message",
-                "Thanh toán thành công! Mã phiếu: " + finished.getCode()
-                + " — Tổng: " + String.format("%,.0f", finished.getTotalPrice()) + " ₫");
+                    "Thanh toán thành công! Mã phiếu: " + finished.getCode()
+                            + " — Tổng: " + String.format("%,.0f", finished.getTotalPrice()) + " ₫");
             resp.sendRedirect(req.getContextPath() + "/employee/bills");
         } else {
             req.getSession().setAttribute("orderError", "Hoàn thành thất bại, vui lòng thử lại!");
@@ -379,14 +447,49 @@ public class EmployeeBillServlet extends HttpServlet {
             return;
         }
 
-        Bill bill   = billDAO.findById(billId);
-        int  result = billDAO.cancelBill(billId);
+        Bill bill = billDAO.findById(billId);
+        int result = billDAO.cancelBill(billId);
         if (result > 0) {
             req.getSession().setAttribute("message", "Đã hủy phiếu " + bill.getCode());
         } else {
             req.getSession().setAttribute("error", "Hủy phiếu thất bại!");
         }
         resp.sendRedirect(req.getContextPath() + "/employee/bills");
+    }
+
+    /** Xóa khách hàng khỏi phiếu (đặt về null) */
+    private void removeCustomer(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws IOException {
+        int billId = ParamUtil.getInt(req, "billId");
+        if (!isOwnerAndWaiting(billId, user)) {
+            resp.sendRedirect(req.getContextPath() + "/employee/bills");
+            return;
+        }
+        int rows = billDAO.assignCustomer(billId, null);
+        if (rows > 0) {
+            req.getSession().setAttribute("customerMsg", "Đã gỡ khách hàng khỏi phiếu.");
+        } else {
+            req.getSession().setAttribute("customerError", "Gỡ khách hàng thất bại!");
+        }
+        resp.sendRedirect(req.getContextPath() + "/employee/bills/order?id=" + billId);
+    }
+
+    /** Xóa các phiếu rác của nhân viên này */
+    private void deleteJunkBills(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws IOException {
+        int deleted = billDAO.deleteJunkBillsByUser(user.getId());
+        if (deleted > 0) {
+            req.getSession().setAttribute("message", "Đã xóa " + deleted + " phiếu rác của bạn.");
+        } else {
+            req.getSession().setAttribute("message", "Không có phiếu rác nào cần xóa.");
+        }
+        resp.sendRedirect(req.getContextPath() + "/employee/bills");
+    }
+
+    /** Cleanup bills, redirect to deleteJunkBills */
+    private void cleanupBills(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws IOException {
+        deleteJunkBills(req, resp, user);
     }
 
     // ──────────────────── Helpers ──────────────────────
@@ -403,12 +506,13 @@ public class EmployeeBillServlet extends HttpServlet {
         try {
             em.getTransaction().begin();
             em.createQuery("UPDATE Bill b SET b.paymentMethod = ?1 WHERE b.id = ?2")
-              .setParameter(1, online)
-              .setParameter(2, billId)
-              .executeUpdate();
+                    .setParameter(1, online)
+                    .setParameter(2, billId)
+                    .executeUpdate();
             em.getTransaction().commit();
         } catch (Exception e) {
-            if (em.getTransaction().isActive()) em.getTransaction().rollback();
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
             e.printStackTrace();
         } finally {
             em.close();

@@ -4,13 +4,11 @@ import java.util.Date;
 import java.util.List;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 
 import com.entity.Bill;
 import com.entity.BillDetail;
 import com.entity.BillDetailInfo;
-import com.entity.BillItemInfo;
 import com.util.JpaUtil;
 
 public class BillDAO implements CrudDAO<Bill, Integer> {
@@ -123,7 +121,7 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
 
     /**
      * Tạo bill + danh sách chi tiết trong cùng 1 transaction.
-     *
+     * 
      * @return id của bill vừa tạo, hoặc 0 nếu thất bại
      */
     public int createWithBillDetails(Bill bill, List<BillDetail> details) {
@@ -307,7 +305,9 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /** Lấy danh sách bill có phân trang */
+    /**
+     * Lấy danh sách bill có phân trang
+     */
     public List<Bill> findAllWithPagination(int page, int pageSize) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
@@ -320,7 +320,9 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /** Đếm tổng số bill */
+    /**
+     * Đếm tổng số bill
+     */
     public int countAll() {
         EntityManager em = JpaUtil.getEntityManager();
         try {
@@ -332,7 +334,9 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /** Lấy danh sách bill theo trạng thái có phân trang */
+    /**
+     * Lấy danh sách bill theo trạng thái có phân trang
+     */
     public List<Bill> findByStatusWithPagination(int status, int page, int pageSize) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
@@ -346,7 +350,9 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /** Đếm số bill theo trạng thái */
+    /**
+     * Đếm số bill theo trạng thái
+     */
     public int countByStatus(int status) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
@@ -359,23 +365,32 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
         }
     }
 
-    /** Hủy đơn hàng (chỉ hủy được khi đang chờ) */
+    /**
+     * Hủy đơn hàng (chỉ hủy được khi đang chờ)
+     */
     public int cancelBill(Integer billId) {
         return updateStatus(billId, Bill.STATUS_CANCEL);
     }
 
-    /** Hoàn thành đơn hàng */
+    /**
+     * Hoàn thành đơn hàng
+     */
     public int completeBill(Integer billId) {
         Bill bill = findById(billId);
         if (bill == null)
             return 0;
+
+        // Chỉ hoàn thành được đơn đang chờ (status = 0)
         if (bill.getStatus() != Bill.STATUS_WAITING) {
             return 0;
         }
+
         return updateStatus(billId, Bill.STATUS_FINISH);
     }
 
-    /** Lấy thông tin chi tiết bill kèm tên nhân viên (dùng native query) */
+    /**
+     * Lấy thông tin chi tiết bill kèm tên nhân viên (dùng native query)
+     */
     public BillDetailInfo getBillDetailInfo(Integer billId) {
         EntityManager em = JpaUtil.getEntityManager();
         try {
@@ -416,34 +431,146 @@ public class BillDAO implements CrudDAO<Bill, Integer> {
     }
 
     /**
+     * Xóa cứng các phiếu ĐÃ HỦY có tổng tiền = 0 của một nhân viên.
+     * Xóa POINT trước (ON DELETE NO ACTION), BILLDETAIL tự CASCADE.
+     */
+    public int deleteJunkBillsByUser(Integer userId) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.createNativeQuery(
+                    "DELETE FROM POINT WHERE bill_id IN (" +
+                            "  SELECT id FROM BILL WHERE status = 2 AND total_price = 0 AND user_id = ?1)")
+                    .setParameter(1, userId).executeUpdate();
+            int rows = em.createQuery(
+                    "DELETE FROM Bill b WHERE b.status = 2 AND b.totalPrice = 0 AND b.userId = ?1")
+                    .setParameter(1, userId).executeUpdate();
+            em.getTransaction().commit();
+            return rows;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            e.printStackTrace();
+            return 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * [Manager] Xóa cứng TẤT CẢ phiếu đã hủy có tổng tiền = 0 (mọi nhân viên).
+     */
+    public int deleteAllJunkBills() {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.createNativeQuery(
+                    "DELETE FROM POINT WHERE bill_id IN (" +
+                            "  SELECT id FROM BILL WHERE status = 2 AND total_price = 0)")
+                    .executeUpdate();
+            int rows = em.createQuery(
+                    "DELETE FROM Bill b WHERE b.status = 2 AND b.totalPrice = 0")
+                    .executeUpdate();
+            em.getTransaction().commit();
+            return rows;
+        } catch (Exception e) {
+            if (em.getTransaction().isActive())
+                em.getTransaction().rollback();
+            e.printStackTrace();
+            return 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /** Lấy bills có phân trang, lọc theo status và userId. */
+    public List<Bill> findWithFilter(Integer statusFilter, Integer userId, int page, int pageSize) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT b FROM Bill b WHERE 1=1");
+            if (statusFilter != null && statusFilter >= 0 && statusFilter <= 2)
+                jpql.append(" AND b.status = :st");
+            if (userId != null && userId > 0)
+                jpql.append(" AND b.userId = :uid");
+            jpql.append(" ORDER BY b.id DESC");
+            var q = em.createQuery(jpql.toString(), Bill.class);
+            if (statusFilter != null && statusFilter >= 0 && statusFilter <= 2)
+                q.setParameter("st", statusFilter);
+            if (userId != null && userId > 0)
+                q.setParameter("uid", userId);
+            q.setFirstResult((page - 1) * pageSize);
+            q.setMaxResults(pageSize);
+            return q.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /** Đếm bills theo filter. */
+    public int countWithFilter(Integer statusFilter, Integer userId) {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            StringBuilder jpql = new StringBuilder("SELECT COUNT(b) FROM Bill b WHERE 1=1");
+            if (statusFilter != null && statusFilter >= 0 && statusFilter <= 2)
+                jpql.append(" AND b.status = :st");
+            if (userId != null && userId > 0)
+                jpql.append(" AND b.userId = :uid");
+            var q = em.createQuery(jpql.toString(), Long.class);
+            if (statusFilter != null && statusFilter >= 0 && statusFilter <= 2)
+                q.setParameter("st", statusFilter);
+            if (userId != null && userId > 0)
+                q.setParameter("uid", userId);
+            Long count = q.getSingleResult();
+            return count != null ? count.intValue() : 0;
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
+     * Thống kê đơn hoàn thành theo từng nhân viên.
+     * Trả về Object[]: [userId, staffName, finishCount, totalRevenue]
+     */
+    @SuppressWarnings("unchecked")
+    public List<Object[]> getStaffSalesStats() {
+        EntityManager em = JpaUtil.getEntityManager();
+        try {
+            String sql = "SELECT b.user_id, u.fullname, " +
+                    "  COUNT(CASE WHEN b.status = 1 THEN 1 END) AS finish_count, " +
+                    "  ISNULL(SUM(CASE WHEN b.status = 1 THEN b.total_price ELSE 0 END), 0) AS total_rev " +
+                    "FROM BILL b LEFT JOIN [USER] u ON b.user_id = u.id " +
+                    "WHERE b.user_id IS NOT NULL " +
+                    "GROUP BY b.user_id, u.fullname ORDER BY finish_count DESC";
+            return (List<Object[]>) em.createNativeQuery(sql).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    /**
      * Sinh mã hóa đơn tuần tự: HD001, HD002, ...
-     *
-     * BUG FIX: Dùng BIGINT thay INT để tránh overflow khi phần số > 2 tỷ.
-     * Chỉ xét mã HDxxx có phần số từ 1–9 chữ số (LEN tổng 3–11).
-     * Các mã dạng timestamp dài hơn bị loại bỏ.
+     * Lấy mã lớn nhất hiện tại rồi tăng lên 1.
+     * Bỏ qua các mã dạng timestamp (HD + 13 chữ số) để tránh overflow.
      */
     public String generateNextCode() {
         EntityManager em = JpaUtil.getEntityManager();
         try {
-            // Dùng BIGINT (không phải INT) để tránh tràn số với mã dài
-            // LEN BETWEEN 3 AND 11 = "HD" + 1..9 chữ số
-            String sql = "SELECT MAX(CAST(SUBSTRING(b.code, 3, LEN(b.code) - 2) AS BIGINT)) " +
-                    "FROM Bill b " +
-                    "WHERE b.code LIKE 'HD%' " +
-                    "  AND ISNUMERIC(SUBSTRING(b.code, 3, LEN(b.code) - 2)) = 1 " +
-                    "  AND LEN(b.code) BETWEEN 3 AND 11 " + // tối đa 9 chữ số → không overflow BIGINT
-                    "  AND SUBSTRING(b.code, 3, 1) BETWEEN '0' AND '9'"; // chắc chắn là số nguyên dương
-
+            // Chỉ xét các mã HDxxx có phần số <= 10 ký tự (tránh overflow INT với mã
+            // timestamp dài)
+            String sql = "SELECT MAX(CAST(SUBSTRING(b.code, 3, LEN(b.code) - 2) AS INT)) " +
+                    "FROM Bill b WHERE b.code LIKE 'HD%' " +
+                    "AND ISNUMERIC(SUBSTRING(b.code, 3, LEN(b.code) - 2)) = 1 " +
+                    "AND LEN(b.code) <= 12";
             Object result = em.createNativeQuery(sql).getSingleResult();
-            long nextNum = 1;
+            int nextNum = 1;
             if (result != null) {
-                nextNum = ((Number) result).longValue() + 1;
+                nextNum = ((Number) result).intValue() + 1;
             }
             return String.format("HD%03d", nextNum);
         } catch (Exception e) {
             e.printStackTrace();
-            // Fallback an toàn: timestamp ngắn gọn
-            return "HD" + (System.currentTimeMillis() % 1_000_000);
+            // Fallback: dùng count + 1
+            return "HD" + String.format("%03d", countAll() + 1);
         } finally {
             em.close();
         }
