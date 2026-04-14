@@ -207,7 +207,7 @@
                             const active = btn.dataset.cat === catId;
                             btn.className = 'menu-cat-btn px-5 py-2 rounded-full text-sm font-semibold transition-all '
                                 + (active
-                                    ? 'bg-primary text-white shadow'
+                                    ? 'bg-primary text-brown shadow'
                                     : 'bg-white border border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary');
                         });
                         document.querySelectorAll('.menu-item').forEach(el => {
