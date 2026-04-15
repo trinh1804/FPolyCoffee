@@ -1,72 +1,111 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ include file="/views/layout/header.jsp" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ include file="/views/layout/header.jsp" %>
 
-        <div class="row justify-content-center">
-            <div class="col-md-7 col-lg-5">
+<div class="flex justify-center py-8">
+    <div class="w-full max-w-md">
+        <div class="pc-card overflow-hidden">
 
-                <h4 class="fw-bold mb-4" style="color:#3d1f0d">
-                    <i class="bi bi-key me-2"></i>Đổi mật khẩu
-                </h4>
+            <%-- ── Gradient header (đồng nhất với login / forgot pages) ── --%>
+            <div class="px-8 pt-8 pb-5" style="background: linear-gradient(135deg, #3d1f0d, #874210);">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-xl">lock_reset</span>
+                    </div>
+                    <div>
+                        <h2 class="font-headline font-bold text-xl text-white">Đổi mật khẩu</h2>
+                        <p class="text-primary-fixed-dim text-xs">Cập nhật mật khẩu đăng nhập của bạn</p>
+                    </div>
+                </div>
+            </div>
+
+            <%-- ── Form body ── --%>
+            <div class="p-8">
 
                 <c:if test="${not empty message}">
-                    <div class="alert alert-success alert-dismissible fade show">
-                        <i class="bi bi-check-circle-fill me-1"></i> ${message}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="alert alert-success">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span> ${message}
                     </div>
                 </c:if>
                 <c:if test="${not empty error}">
-                    <div class="alert alert-danger alert-dismissible fade show">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i> ${error}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <div class="alert alert-danger">
+                        <span class="material-symbols-outlined text-[18px]">error</span> ${error}
                     </div>
                 </c:if>
 
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-header card-header-gold py-3 border-0">
-                        <i class="bi bi-shield-lock me-1"></i> Thay đổi mật khẩu
+                <form action="${pageContext.request.contextPath}/doi-mat-khau" method="post"
+                      onsubmit="return validatePasswordForm()">
+
+                    <div class="mb-5">
+                        <label class="form-label">Mật khẩu hiện tại <span style="color:#C62828">*</span></label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">key</span>
+                            <input type="password" class="form-control pl-10" name="oldPassword"
+                                   id="oldPassword" placeholder="Nhập mật khẩu hiện tại"
+                                   minlength="1" required>
+                        </div>
                     </div>
-                    <div class="card-body p-4">
-                        <form action="${pageContext.request.contextPath}/doi-mat-khau" method="post">
 
-                            <div class="mb-3">
-                                <label for="oldPassword" class="form-label fw-semibold">
-                                    <span class="text-danger">*</span> Mật khẩu cũ
-                                </label>
-                                <input type="password" class="form-control" id="oldPassword" name="oldPassword"
-                                    placeholder="Nhập mật khẩu hiện tại" required>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="newPassword" class="form-label fw-semibold">
-                                    <span class="text-danger">*</span> Mật khẩu mới
-                                </label>
-                                <input type="password" class="form-control" id="newPassword" name="newPassword"
-                                    placeholder="Ít nhất 6 ký tự" required>
-                                <div class="form-text">Mật khẩu phải có ít nhất 6 ký tự</div>
-                            </div>
-
-                            <div class="mb-4">
-                                <label for="confirmPassword" class="form-label fw-semibold">
-                                    <span class="text-danger">*</span> Xác nhận mật khẩu mới
-                                </label>
-                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword"
-                                    placeholder="Nhập lại mật khẩu mới" required>
-                            </div>
-
-                            <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-coffee">
-                                    <i class="bi bi-check-lg me-1"></i> Đổi mật khẩu
-                                </button>
-                                <a href="${pageContext.request.contextPath}/thong-tin-ca-nhan"
-                                    class="btn btn-outline-secondary">
-                                    <i class="bi bi-arrow-left me-1"></i> Quay lại
-                                </a>
-                            </div>
-                        </form>
+                    <div class="mb-5">
+                        <label class="form-label">Mật khẩu mới <span style="color:#C62828">*</span></label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">lock_reset</span>
+                            <input type="password" class="form-control pl-10" name="newPassword"
+                                   id="newPassword" placeholder="Tối thiểu 6 ký tự"
+                                   minlength="6" required
+                                   oninput="clearConfirmError()">
+                        </div>
+                        <p class="text-xs mt-1" style="color:#9E7B5E">Mật khẩu phải có ít nhất 6 ký tự</p>
                     </div>
-                </div>
 
+                    <div class="mb-6">
+                        <label class="form-label">Xác nhận mật khẩu mới <span style="color:#C62828">*</span></label>
+                        <div class="relative">
+                            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-[18px]">lock</span>
+                            <input type="password" class="form-control pl-10" name="confirmPassword"
+                                   id="confirmPassword" placeholder="Nhập lại mật khẩu mới"
+                                   minlength="6" required
+                                   oninput="clearConfirmError()">
+                        </div>
+                        <p id="confirmError" class="text-xs mt-1 hidden" style="color:#C62828">
+                            <span class="material-symbols-outlined text-[13px]">error</span>
+                            Mật khẩu xác nhận không khớp!
+                        </p>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="submit" class="btn btn-primary flex-1 py-3">
+                            <span class="material-symbols-outlined text-[18px]">check</span> Đổi mật khẩu
+                        </button>
+                        <a href="${pageContext.request.contextPath}/thong-tin-ca-nhan"
+                           class="btn btn-outline flex-1 py-3">
+                            <span class="material-symbols-outlined text-[18px]">arrow_back</span> Quay lại
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
+    </div>
+</div>
 
-        <%@ include file="/views/layout/footer.jsp" %>
+<script>
+function validatePasswordForm() {
+    var np  = document.getElementById('newPassword').value;
+    var cp  = document.getElementById('confirmPassword').value;
+    var err = document.getElementById('confirmError');
+    if (np !== cp) {
+        err.classList.remove('hidden');
+        document.getElementById('confirmPassword').style.borderColor = '#C62828';
+        return false;
+    }
+    return true;
+}
+function clearConfirmError() {
+    var err = document.getElementById('confirmError');
+    if (err) err.classList.add('hidden');
+    var cf = document.getElementById('confirmPassword');
+    if (cf) cf.style.borderColor = '';
+}
+</script>
+
+<%@ include file="/views/layout/footer.jsp" %>

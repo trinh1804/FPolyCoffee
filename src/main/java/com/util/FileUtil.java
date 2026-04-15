@@ -9,49 +9,43 @@ import java.nio.file.Paths;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 
+/**
+ * Lưu ảnh vào webapp/uploads/ — Tomcat tự serve static, không cần servlet thêm.
+ */
 public class FileUtil {
+
     private static final String FOLDER = "/uploads/";
 
-    public static String upload(HttpServletRequest request, String name) throws IOException {
+    public static String upload(HttpServletRequest request, String fieldName) throws IOException {
         try {
-            Part part = request.getPart(name);
+            Part part = request.getPart(fieldName);
             if (part == null)
                 return null;
-            String fileName = part.getSubmittedFileName();
-            if (fileName == null || fileName.isEmpty())
+
+            String originalName = part.getSubmittedFileName();
+            if (originalName == null || originalName.trim().isEmpty())
                 return null;
 
-            // Lấy phần mở rộng của file
-            String ext = "";
-            int lastDot = fileName.lastIndexOf(".");
-            if (lastDot > 0) {
-                ext = fileName.substring(lastDot);
+            // Chỉ cho phép ảnh
+            String lower = originalName.toLowerCase();
+            if (!lower.endsWith(".jpg") && !lower.endsWith(".jpeg")
+                    && !lower.endsWith(".png") && !lower.endsWith(".gif")
+                    && !lower.endsWith(".webp") && !lower.endsWith(".avif")) {
+                return null;
             }
 
-            // Tạo tên file duy nhất
+            String ext = originalName.substring(originalName.lastIndexOf('.'));
             String uniqueName = System.currentTimeMillis() + ext;
 
-            // Lấy đường dẫn thực tế
-            String realPath = request.getServletContext().getRealPath(FOLDER);
-            if (realPath == null) {
-                // Fallback nếu không lấy được realPath
-                realPath = request.getServletContext().getInitParameter("uploadPath");
-                if (realPath == null) {
-                    realPath = System.getProperty("java.io.tmpdir") + "/uploads/";
-                }
-            }
-
-            // Tạo thư mục nếu chưa tồn tại
-            Path uploadPath = Paths.get(realPath);
+            String uploadDir = request.getServletContext().getRealPath(FOLDER);
+            Path uploadPath = Paths.get(uploadDir);
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
             }
 
-            // Lưu file
-            String filePath = realPath + File.separator + uniqueName;
-            part.write(filePath);
-
+            part.write(uploadDir + File.separator + uniqueName);
             return uniqueName;
+
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -59,14 +53,11 @@ public class FileUtil {
     }
 
     public static boolean delete(HttpServletRequest request, String fileName) {
+        if (fileName == null || fileName.trim().isEmpty())
+            return false;
         try {
-            if (fileName == null || fileName.isEmpty())
-                return false;
-            String realPath = request.getServletContext().getRealPath(FOLDER);
-            if (realPath == null)
-                return false;
-
-            File file = new File(realPath, fileName);
+            String uploadDir = request.getServletContext().getRealPath(FOLDER);
+            File file = new File(uploadDir, fileName);
             return file.exists() && file.isFile() && file.delete();
         } catch (Exception e) {
             e.printStackTrace();
