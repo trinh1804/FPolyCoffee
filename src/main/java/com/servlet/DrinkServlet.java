@@ -17,20 +17,29 @@ import com.entity.Drink;
 import com.util.FileUtil;
 import com.util.ParamUtil;
 
-@WebServlet({ "/manager/drinks", "/manager/drinks/add", "/manager/drinks/edit", "/manager/drinks/delete" })
+@WebServlet({
+        "/manager/drinks",
+        "/manager/drinks/add",
+        "/manager/drinks/edit",
+        "/manager/drinks/delete",
+        "/manager/drinks/toggle-status"
+})
 @MultipartConfig
 public class DrinkServlet extends HttpServlet {
 
     private final DrinkDAO drinkDAO = new DrinkDAO();
     private final CategoryDAO categoryDAO = new CategoryDAO();
-    private static final int PAGE_SIZE = 10; // Mỗi trang 10 sản phẩm
+    private static final int PAGE_SIZE = 10;
+
+    // ─────────────── GET ───────────────
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
         String uri = req.getRequestURI();
 
-        // Xử lý sửa đồ uống
+        // Form chỉnh sửa — load đồ uống theo id
         if (uri.contains("/edit")) {
             int id = ParamUtil.getInt(req, "id");
             if (id > 0) {
@@ -38,7 +47,7 @@ public class DrinkServlet extends HttpServlet {
             }
         }
 
-        // Lấy tham số tìm kiếm
+        // Tham số tìm kiếm
         String searchName = ParamUtil.getString(req, "searchName");
         Integer categoryId = ParamUtil.getInt(req, "categoryId", 0);
         String statusStr = ParamUtil.getString(req, "status");
@@ -47,21 +56,18 @@ public class DrinkServlet extends HttpServlet {
             active = "active".equals(statusStr);
         }
 
-        // Lấy số trang hiện tại
+        // Phân trang
         int page = ParamUtil.getInt(req, "page", 1);
         if (page < 1)
             page = 1;
 
-        // Tìm kiếm và phân trang
-        List<Drink> drinks = drinkDAO.searchAndPaginate(searchName, categoryId > 0 ? categoryId : null, active, page,
-                PAGE_SIZE);
-        int totalRecords = drinkDAO.countSearch(searchName, categoryId > 0 ? categoryId : null, active);
+        List<Drink> drinks = drinkDAO.searchAndPaginate(
+                searchName, categoryId > 0 ? categoryId : null, active, page, PAGE_SIZE);
+        int totalRecords = drinkDAO.countSearch(
+                searchName, categoryId > 0 ? categoryId : null, active);
         int totalPages = (int) Math.ceil((double) totalRecords / PAGE_SIZE);
-
-        // Lấy danh sách danh mục cho dropdown
         List<Category> categories = categoryDAO.findAllActive();
 
-        // Gửi dữ liệu sang JSP
         req.setAttribute("drinks", drinks);
         req.setAttribute("categories", categories);
         req.setAttribute("searchName", searchName);
@@ -71,63 +77,65 @@ public class DrinkServlet extends HttpServlet {
         req.setAttribute("totalPages", totalPages);
         req.setAttribute("totalRecords", totalRecords);
 
+        // Flash messages từ redirect
+        transferFlash(req, "message");
+        transferFlash(req, "error");
+
         req.getRequestDispatcher("/views/drink/manager-list.jsp").forward(req, resp);
     }
+
+    // ─────────────── POST ──────────────
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
+
         String uri = req.getRequestURI();
 
-        if (uri.contains("/add")) {
+        if (uri.contains("/add"))
             create(req);
-        } else if (uri.contains("/edit")) {
+        else if (uri.contains("/edit"))
             update(req);
-        } else if (uri.contains("/delete")) {
+        else if (uri.contains("/toggle-status"))
+            toggleStatus(req);
+        else if (uri.contains("/delete"))
             delete(req);
-        }
 
-        // Redirect về danh sách
         resp.sendRedirect(req.getContextPath() + "/manager/drinks");
     }
+
+    // ─────────────── Handlers ──────────
 
     private void create(HttpServletRequest req) {
         try {
             String name = ParamUtil.getString(req, "name");
             if (name == null || name.isBlank()) {
-                req.setAttribute("error", "Tên đồ uống không được để trống!");
+                req.getSession().setAttribute("error", "Tên đồ uống không được để trống!");
                 return;
             }
-
             double price = ParamUtil.getDouble(req, "price", 0);
             if (price <= 0) {
-                req.setAttribute("error", "Giá phải lớn hơn 0!");
+                req.getSession().setAttribute("error", "Giá phải lớn hơn 0!");
                 return;
             }
-
-            int categoryId = ParamUtil.getInt(req, "categoryId", 0);
-            if (categoryId <= 0) {
-                req.setAttribute("error", "Vui lòng chọn danh mục!");
+            int catId = ParamUtil.getInt(req, "categoryId", 0);
+            if (catId <= 0) {
+                req.getSession().setAttribute("error", "Vui lòng chọn danh mục!");
                 return;
             }
-
-            String description = ParamUtil.getString(req, "description", "");
+            String desc = ParamUtil.getString(req, "description", "");
             boolean active = ParamUtil.getBoolean(req, "active");
             String image = FileUtil.upload(req, "image");
 
-            Drink drink = new Drink(null, name, price, description,
-                    image == null ? "" : image,
-                    active, categoryId);
+            Drink drink = new Drink(null, name, price, desc,
+                    image == null ? "" : image, active, catId);
 
-            int result = drinkDAO.create(drink);
-            if (result > 0) {
-                req.setAttribute("message", "Thêm đồ uống thành công!");
-            } else {
-                req.setAttribute("error", "Thêm đồ uống thất bại!");
-            }
+            int r = drinkDAO.create(drink);
+            req.getSession().setAttribute(r > 0 ? "message" : "error",
+                    r > 0 ? "Thêm \"" + name + "\" thành công!" : "Thêm thất bại!");
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("error", "Lỗi: " + e.getMessage());
+            req.getSession().setAttribute("error", "Lỗi: " + e.getMessage());
         }
     }
 
@@ -136,64 +144,80 @@ public class DrinkServlet extends HttpServlet {
             int id = ParamUtil.getInt(req, "id");
             Drink drink = drinkDAO.findById(id);
             if (drink == null) {
-                req.setAttribute("error", "Không tìm thấy đồ uống!");
+                req.getSession().setAttribute("error", "Không tìm thấy đồ uống!");
                 return;
             }
-
             String name = ParamUtil.getString(req, "name");
             if (name == null || name.isBlank()) {
-                req.setAttribute("error", "Tên đồ uống không được để trống!");
+                req.getSession().setAttribute("error", "Tên đồ uống không được để trống!");
                 return;
             }
-
             double price = ParamUtil.getDouble(req, "price", 0);
             if (price <= 0) {
-                req.setAttribute("error", "Giá phải lớn hơn 0!");
+                req.getSession().setAttribute("error", "Giá phải lớn hơn 0!");
                 return;
             }
-
-            int categoryId = ParamUtil.getInt(req, "categoryId", 0);
-            if (categoryId <= 0) {
-                req.setAttribute("error", "Vui lòng chọn danh mục!");
+            int catId = ParamUtil.getInt(req, "categoryId", 0);
+            if (catId <= 0) {
+                req.getSession().setAttribute("error", "Vui lòng chọn danh mục!");
                 return;
             }
-
-            String description = ParamUtil.getString(req, "description", "");
-            boolean active = ParamUtil.getBoolean(req, "active");
-
             drink.setName(name);
             drink.setPrice(price);
-            drink.setCategoryId(categoryId);
-            drink.setDescription(description);
-            drink.setActive(active);
+            drink.setCategoryId(catId);
+            drink.setDescription(ParamUtil.getString(req, "description", ""));
+            drink.setActive(ParamUtil.getBoolean(req, "active"));
 
-            // Xử lý upload ảnh mới
             String newImage = FileUtil.upload(req, "image");
-            if (newImage != null && !newImage.isEmpty()) {
+            if (newImage != null && !newImage.isEmpty())
                 drink.setImage(newImage);
-            }
 
-            int result = drinkDAO.update(drink);
-            if (result > 0) {
-                req.setAttribute("message", "Cập nhật đồ uống thành công!");
-            } else {
-                req.setAttribute("error", "Cập nhật đồ uống thất bại!");
-            }
+            int r = drinkDAO.update(drink);
+            req.getSession().setAttribute(r > 0 ? "message" : "error",
+                    r > 0 ? "Cập nhật \"" + name + "\" thành công!" : "Cập nhật thất bại!");
         } catch (Exception e) {
             e.printStackTrace();
-            req.setAttribute("error", "Lỗi: " + e.getMessage());
+            req.getSession().setAttribute("error", "Lỗi: " + e.getMessage());
         }
     }
 
+    /**
+     * Toggle active/inactive — cho phép cả MỞ lại đồ uống đã ẩn.
+     * Thay vì softDelete chỉ đặt active=false, hàm này đảo ngược trạng thái.
+     */
+    private void toggleStatus(HttpServletRequest req) {
+        int id = ParamUtil.getInt(req, "id");
+        Drink drink = drinkDAO.findById(id);
+        if (drink == null) {
+            req.getSession().setAttribute("error", "Không tìm thấy đồ uống!");
+            return;
+        }
+        drink.setActive(!drink.isActive());
+        int r = drinkDAO.update(drink);
+        if (r > 0) {
+            req.getSession().setAttribute("message",
+                    "\"" + drink.getName() + "\" đã " + (drink.isActive() ? "mở bán" : "ngừng bán") + "!");
+        } else {
+            req.getSession().setAttribute("error", "Cập nhật trạng thái thất bại!");
+        }
+    }
+
+    /** Xóa vật lý — chỉ dùng khi admin cần xóa hoàn toàn */
     private void delete(HttpServletRequest req) {
         int id = ParamUtil.getInt(req, "id");
-        if (id > 0) {
-            int result = drinkDAO.softDelete(id);
-            if (result > 0) {
-                req.setAttribute("message", "Đã ẩn đồ uống!");
-            } else {
-                req.setAttribute("error", "Thao tác thất bại!");
-            }
+        Drink drink = drinkDAO.findById(id);
+        if (drink != null) {
+            int r = drinkDAO.softDelete(id); // soft-delete trước khi cho xóa hẳn
+            req.getSession().setAttribute(r > 0 ? "message" : "error",
+                    r > 0 ? "Đã ẩn \"" + drink.getName() + "\"!" : "Thao tác thất bại!");
+        }
+    }
+
+    private void transferFlash(HttpServletRequest req, String key) {
+        Object v = req.getSession().getAttribute(key);
+        if (v != null) {
+            req.setAttribute(key, v);
+            req.getSession().removeAttribute(key);
         }
     }
 }

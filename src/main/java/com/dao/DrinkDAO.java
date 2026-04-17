@@ -144,7 +144,7 @@ public class DrinkDAO implements CrudDAO<Drink, Integer> {
                 jpql.append(" AND d.active = :active");
             }
 
-            jpql.append(" ORDER BY d.id DESC");
+            jpql.append(" ORDER BY d.id ");
 
             TypedQuery<Drink> query = em.createQuery(jpql.toString(), Drink.class);
 

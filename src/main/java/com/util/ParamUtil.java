@@ -33,9 +33,17 @@ public class ParamUtil {
         }
     }
 
+    /**
+     * BUG FIX: phiên bản cũ luôn gọi getInt(req, name) và bọc trong try-catch,
+     * nhưng getInt không throw — defaultValue không bao giờ được trả về.
+     * Fix: kiểm tra tham số null/rỗng trước, rồi mới parse.
+     */
     public static int getInt(HttpServletRequest request, String name, int defaultValue) {
         try {
-            return getInt(request, name);
+            String value = request.getParameter(name);
+            if (value == null || value.trim().isEmpty())
+                return defaultValue;        // ← trả về defaultValue nếu không có param
+            return Integer.parseInt(value.trim());
         } catch (Exception e) {
             return defaultValue;
         }
