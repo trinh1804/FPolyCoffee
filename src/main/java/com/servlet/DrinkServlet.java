@@ -22,7 +22,7 @@ import com.util.ParamUtil;
         "/manager/drinks/add",
         "/manager/drinks/edit",
         "/manager/drinks/delete",
-        "/manager/drinks/toggle-status" // ← MỚI: mở/ẩn đồ uống
+        "/manager/drinks/toggle-status"
 })
 @MultipartConfig
 public class DrinkServlet extends HttpServlet {
@@ -76,10 +76,6 @@ public class DrinkServlet extends HttpServlet {
         req.setAttribute("currentPage", page);
         req.setAttribute("totalPages", totalPages);
         req.setAttribute("totalRecords", totalRecords);
-
-        // Flash messages từ redirect
-        transferFlash(req, "message");
-        transferFlash(req, "error");
 
         // Flash messages từ redirect
         transferFlash(req, "message");

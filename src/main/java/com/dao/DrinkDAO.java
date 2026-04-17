@@ -67,23 +67,6 @@ public class DrinkDAO implements CrudDAO<Drink, Integer> {
         }
     }
 
-    /** Kiểm tra drink có tồn tại trong bill nào không */
-    public boolean isUsedInBill(Integer drinkId) {
-        EntityManager em = JpaUtil.getEntityManager();
-        try {
-            Long count = em.createQuery(
-                    "SELECT COUNT(b) FROM BillDetail b WHERE b.drinkId = ?1", Long.class)
-                    .setParameter(1, drinkId)
-                    .getSingleResult();
-            return count != null && count > 0;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return true;
-        } finally {
-            em.close();
-        }
-    }
-
     /** Soft delete – ẩn đồ uống thay vì xóa */
     public int softDelete(Integer id) {
         EntityManager em = JpaUtil.getEntityManager();

@@ -102,7 +102,8 @@
                                                     <form
                                                         action="${pageContext.request.contextPath}/manager/categories/delete"
                                                         method="post" class="inline"
-                                                        onsubmit="return confirm('${cat.active ? 'Ẩn' : 'Hiện lại'} danh mục «${cat.name}»?')">
+                                                        data-msg="${cat.active ? 'Ẩn danh mục ' : 'Hiện lại danh mục '}${cat.name}?"
+                                                        onsubmit="return confirm(this.dataset.msg)">
                                                         <input type="hidden" name="id" value="${cat.id}">
                                                         <button type="submit"
                                                             class="btn btn-sm ${cat.active ? 'btn-outline' : 'btn-success'}"

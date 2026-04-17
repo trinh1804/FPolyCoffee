@@ -22,8 +22,8 @@ import com.util.AuthUtil;
 public class HomeServlet extends HttpServlet {
 
     private final CategoryDAO categoryDAO = new CategoryDAO();
-    private final DrinkDAO drinkDAO = new DrinkDAO();
-    private final BillDAO billDAO = new BillDAO();
+    private final DrinkDAO    drinkDAO    = new DrinkDAO();
+    private final BillDAO     billDAO     = new BillDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -31,9 +31,9 @@ public class HomeServlet extends HttpServlet {
 
         // Dữ liệu thực đơn cho mọi người dùng
         List<Category> categories = categoryDAO.findAllActive();
-        List<Drink> drinks = drinkDAO.findAllActive();
+        List<Drink>    drinks     = drinkDAO.findAllActive();
         req.setAttribute("categories", categories);
-        req.setAttribute("drinks", drinks);
+        req.setAttribute("drinks",     drinks);
 
         // Nhân viên đã đăng nhập: lấy phiếu đang mở của họ
         User user = AuthUtil.getUser(req);

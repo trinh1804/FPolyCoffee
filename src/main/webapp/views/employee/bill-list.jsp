@@ -9,22 +9,22 @@
                         Phiếu bán hàng của tôi
                     </h1>
                     <div class="flex gap-2">
-                        <%-- Nút dọn phiếu rỗng --%>
-                            <form action="${pageContext.request.contextPath}/employee/bills/cleanup" method="post"
-                                class="inline"
-                                onsubmit="return confirm('Hủy tất cả phiếu đang chờ không có sản phẩm nào?\nThao tác không thể hoàn tác!')">
-                                <button type="submit" class="btn btn-outline btn-sm"
-                                    style="color:#C62828;border-color:#C62828"
-                                    title="Hủy toàn bộ phiếu đang chờ mà không có sản phẩm nào">
-                                    <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
-                                    Dọn phiếu rỗng
-                                </button>
-                            </form>
+                        <!-- Nút dọn phiếu rỗng -->
+                        <form action="${pageContext.request.contextPath}/employee/bills/cleanup" method="post"
+                            class="inline"
+                            onsubmit="return confirm('Hủy tất cả phiếu đang chờ không có sản phẩm nào?\nThao tác không thể hoàn tác!')">
+                            <button type="submit" class="btn btn-outline btn-sm"
+                                style="color:#C62828;border-color:#C62828"
+                                title="Hủy toàn bộ phiếu đang chờ mà không có sản phẩm nào">
+                                <span class="material-symbols-outlined text-[16px]">delete_sweep</span>
+                                Dọn phiếu rỗng
+                            </button>
+                        </form>
 
-                            <a href="${pageContext.request.contextPath}/employee/bills/create" class="btn btn-primary">
-                                <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                                Tạo phiếu mới
-                            </a>
+                        <a href="${pageContext.request.contextPath}/employee/bills/create" class="btn btn-primary">
+                            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                            Tạo phiếu mới
+                        </a>
                     </div>
                 </div>
 
